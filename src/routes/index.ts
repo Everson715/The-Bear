@@ -9,9 +9,4 @@ const router = Router();
 router.get("/menu", menuController.getAll);
 router.post("/menu", menuController.create);
 
-// Mission
-router.post("/missions", missionController.create);
-router.get("/missions", missionController.getAll);
-router.put("/missions/:id/complete", missionController.complete);
-
 export default router;

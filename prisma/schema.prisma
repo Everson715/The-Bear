@@ -17,6 +17,7 @@ model User {
   level         String         @default("Urso Curioso")
   notifications Notification[]
   purchases     Purchase[]
+  userMissions  UserMission[]
 }
 
 model Notification {
@@ -48,8 +49,21 @@ model Purchase {
 }
 
 model Mission {
-  id          Int     @id @default(autoincrement())
-  description String
-  category    String
-  completed   Boolean @default(false)
+  id                 Int     @id @default(autoincrement())
+  title              String
+  description        String?
+  requiredCategories  String?  // Exemplo: armazenar JSON string ou CSV
+
+  userMissions UserMission[]
+}
+
+model UserMission {
+  userId    String
+  missionId Int
+  completed Boolean  @default(false)
+
+  user    User    @relation(fields: [userId], references: [id])
+  mission Mission @relation(fields: [missionId], references: [id])
+
+  @@id([userId, missionId])
 }
