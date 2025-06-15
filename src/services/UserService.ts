@@ -1,26 +1,67 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { UserRepository } from "../repositories/UserRepository";
+import { prisma } from "../utils/prisma";
 
-const userRepo = new UserRepository();
+const jwtSecret = process.env.JWT_SECRET || "secreta-do-bear";
 
 export class UserService {
   async register(name: string, email: string, password: string) {
-    const existing = await userRepo.findByEmail(email);
-    if (existing) throw new Error("Usuário já existe");
+    const existingUser = await prisma.user.findUnique({ where: { email } });
+    if (existingUser) {
+      throw new Error("E-mail já cadastrado");
+    }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    return userRepo.create(name, email, hashedPassword);
+
+    return await prisma.user.create({
+      data: {
+        name,
+        email,
+        password: hashedPassword,
+        xp: 0,
+        coffeeBeans: 0,
+        level: "Urso Curioso"
+      }
+    });
   }
 
   async login(email: string, password: string) {
-    const user = await userRepo.findByEmail(email);
-    if (!user) throw new Error("Usuário não encontrado");
+    const user = await prisma.user.findUnique({
+      where: { email },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        password: true,
+        xp: true,
+        coffeeBeans: true,
+        level: true
+      }
+    });
 
-    const valid = await bcrypt.compare(password, user.password);
-    if (!valid) throw new Error("Senha inválida");
+    if (!user) {
+      throw new Error("Email ou senha inválidos");
+    }
 
-    const token = jwt.sign({ id: user.id }, "secreta-do-bear", { expiresIn: "1d" });
-    return { token, user: { id: user.id, name: user.name, email: user.email } };
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      throw new Error("Email ou senha inválidos");
+    }
+
+    const token = jwt.sign({ userId: user.id }, jwtSecret, { expiresIn: "1d" });
+
+    const { password: _, ...userWithoutPassword } = user;
+
+    return { user: userWithoutPassword, token };
+  }
+
+  async findById(id: string) {
+    return await prisma.user.findUnique({
+      where: { id },
+      include: {
+        purchases: true,
+        notifications: true
+      }
+    });
   }
 }

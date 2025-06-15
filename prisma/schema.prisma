@@ -7,39 +7,34 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id            String         @id @default(uuid())
+  name          String
+  email         String         @unique
+  password      String
+  xp            Int            @default(0)
+  coffeeBeans   Int            @default(0)
+  level         String         @default("Urso Curioso")
+  notifications Notification[]
+  purchases     Purchase[]
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  message   String
+  createdAt DateTime @default(now())
+  read      Boolean  @default(false)
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+}
+
 model MenuItem {
   id        Int        @id @default(autoincrement())
   name      String
   category  String
   price     Float
   purchases Purchase[]
-}
-
-model Mission {
-  id          Int     @id @default(autoincrement())
-  description String
-  category    String
-  completed   Boolean @default(false)
-}
-
-model Notification {
-  id        String   @id @default(uuid())
-  message   String
-  read      Boolean  @default(false) // Adicionei campo read para controle de leitura
-  createdAt DateTime @default(now())
-
-  userId String
-  user   User   @relation(fields: [userId], references: [id])
-}
-
-model User {
-  id            String         @id @default(uuid())
-  email         String         @unique
-  xp            Int            @default(0)
-  coffeeBeans   Int            @default(0)
-  level         String         @default("Urso Curioso")
-  notifications Notification[]
-  purchases     Purchase[]
 }
 
 model Purchase {
@@ -50,4 +45,11 @@ model Purchase {
 
   menuItem   MenuItem  @relation(fields: [menuItemId], references: [id])
   user       User      @relation(fields: [userId], references: [id])
+}
+
+model Mission {
+  id          Int     @id @default(autoincrement())
+  description String
+  category    String
+  completed   Boolean @default(false)
 }

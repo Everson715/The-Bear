@@ -1,9 +1,10 @@
 import { Router } from 'express';
-import { getNotifications, markNotificationRead } from '../controllers/NotificationController';
+import { NotificationController } from '../controllers/NotificationController';
 
 const router = Router();
+const notificationController = new NotificationController();
 
-router.get('/:userId', getNotifications);
-router.patch('/:id/read', markNotificationRead);
+router.get('/:userId', (req, res, next) => notificationController.getByUser(req, res, next));
+router.patch('/:id/read', (req, res, next) => notificationController.markAsRead(req, res, next));
 
 export default router;

@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>The Bear</title>
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
   <style>
     html {
       scroll-behavior: smooth;
@@ -29,8 +31,58 @@
     .navbar-buttons button:hover {
       background: #fff2e6;
     }
+
+    .footer {
+  background-color: #4b2e2e;
+  color: #fff;
+  padding: 2rem;
+  text-align: center;
+  font-family: sans-serif;
+}
+
+.footer-content {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  gap: 2rem;
+  margin-bottom: 1rem;
+}
+
+.footer-content div {
+  min-width: 200px;
+}
+
+.footer h3, .footer h4 {
+  margin-bottom: 0.5rem;
+}
+
+.footer a {
+  color: #fff2e6;
+  text-decoration: none;
+  display: block;
+  margin: 0.25rem 0;
+  transition: color 0.3s;
+}
+
+.footer a:hover {
+  color: #ffd6a0;
+  text-decoration: underline;
+}
+
+.footer-bottom {
+  border-top: 1px solid #fff;
+  padding-top: 1rem;
+  font-size: 0.9rem;
+}
+
   </style>
 </head>
+
+<script>
+  document.getElementById("current-year").textContent = new Date().getFullYear();
+</script>
+
+
 <body>
   <nav>
     <h1>The Bear</h1>
@@ -72,13 +124,31 @@
       <p>Explore o cardápio completo na aba <strong>Cardápio</strong> acima.</p>
     </section>
 
-    <section id="contact">
-      <h2>Contato</h2>
-      <p>📍 Rua do Café, 123 - Centro, Caféville</p>
-      <p>📞 (11) 1234-5678</p>
-      <p>📧 contato@thebearjourney.com</p>
-      <p>Siga-nos no Instagram <strong>@thebearjourney</strong> 🐻</p>
-    </section>
-  </main>
+      <section id="contact">
+       <footer class="footer">
+  <div class="footer-content">
+    <div class="footer-brand">
+      <h3>The Bear</h3>
+      <p>Transformando cafés em aventuras.</p>
+    </div>
+
+    <div class="footer-social">
+      <h4>Redes</h4>
+      <a href="https://www.instagram.com/everson.syfy_7/" target="_blank" rel="noopener noreferrer">
+        <i class="fab fa-instagram"></i> Instagram
+      </a>
+      <a href="https://github.com/Everson715" target="_blank" rel="noopener noreferrer">
+        <i class="fab fa-github"></i> GitHub
+      </a>
+    </div>
+  </div>
+
+  <div class="footer-bottom">
+    <p>&copy; <span id="current-year"></span> The Bear. Todos os direitos reservados.</p>
+    <p>Power by <strong>Artorias</strong>.</p>
+  </div>
+</footer>
+      </section>
+  </main> 
 </body>
 </html>
