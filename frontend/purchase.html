@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>Compras</title>
-  <link rel="stylesheet" href="style.css">
-  <script src="scripts/purchase.js" defer></script>
+  <meta charset="UTF-8" />
+  <title>Registrar Compra - The Bear Journey</title>
+  <link rel="stylesheet" href="style.css" />
+  <script defer src="./scripts/purchase.js"></script>
 </head>
 <body>
   <nav>
@@ -18,14 +18,23 @@
 
   <main>
     <h2>Registrar Compra</h2>
-    <form id="purchase-form">
-      <input type="text" id="menuItemId" placeholder="ID do Item do Cardápio" required>
-      <input type="number" id="quantity" placeholder="Quantidade" required>
+    <form id="purchaseForm">
+      <label for="userId">ID do Usuário:</label>
+      <input type="text" id="userId" required />
+
+      <label for="menuItemId">ID do Item do Menu:</label>
+      <input type="text" id="menuItemId" required />
+
+      <label for="quantity">Quantidade:</label>
+      <input type="number" id="quantity" min="1" value="1" required />
+
       <button type="submit">Registrar</button>
     </form>
 
     <h2>Compras Realizadas</h2>
     <ul id="purchase-list"></ul>
+
+    <div id="result"></div>
   </main>
 </body>
 </html>

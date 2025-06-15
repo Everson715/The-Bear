@@ -9,10 +9,6 @@ const router = Router();
 router.get("/menu", menuController.getAll);
 router.post("/menu", menuController.create);
 
-// Purchase
-router.post("/purchase", purchaseController.create);
-router.get("/purchase", purchaseController.getAll);
-
 // Mission
 router.post("/missions", missionController.create);
 router.get("/missions", missionController.getAll);

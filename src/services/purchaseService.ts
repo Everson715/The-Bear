@@ -1,3 +1,4 @@
+// src/services/purchaseService.ts
 import { prisma } from "../utils/prisma";
 import NotificationService from "./NotificationService";
 import { validateCombo } from "../utils/validateCombo";
@@ -15,8 +16,7 @@ export const purchaseService = {
     const item = await prisma.menuItem.findUnique({
       where: { id: menuItemId },
     });
-
-    if (!item) throw new Error("Item não encontrado");
+    if (!item) throw new Error("Item do cardápio não encontrado.");
 
     // Busca o usuário
     const user = await prisma.user.findUnique({
@@ -26,20 +26,19 @@ export const purchaseService = {
         xp: true,
         coffeeBeans: true,
         level: true,
-        email: true,
       },
     });
+    if (!user) throw new Error("Usuário não encontrado.");
 
-    if (!user) throw new Error("Usuário não encontrado");
+    // Calcula XP e grãos ganhos com base no preço do item
+    const xpGanhos = Math.floor(item.price);
+    const graosGanhos = Math.floor(item.price / 2);
 
-    // Cálculo de XP e grãos de café
-    const xpGanhos = Math.floor(item.price); // XP = preço
-    const graosGanhos = Math.floor(item.price / 2); // Grãos = metade do preço
-    const novoXP = user.xp+ xpGanhos;
+    const novoXP = user.xp + xpGanhos;
     const novosGraos = user.coffeeBeans + graosGanhos;
     const novoNivel = calcularNovoNivel(novoXP);
 
-    // Atualiza o usuário com os novos dados
+    // Atualiza usuário com novos valores
     await prisma.user.update({
       where: { id: userId },
       data: {
@@ -49,7 +48,7 @@ export const purchaseService = {
       },
     });
 
-    // Cria a compra após atualizar o usuário
+    // Cria a compra
     const purchase = await prisma.purchase.create({
       data: {
         userId,
@@ -57,10 +56,10 @@ export const purchaseService = {
       },
     });
 
-    // Validação de combos (se aplicável)
+    // Validação de combos, se necessário
     await validateCombo();
 
-    // Notificação
+    // Notificação ao usuário
     await NotificationService.notifyUser(
       userId,
       `Você comprou "${item.name}" e ganhou ${xpGanhos} XP e ${graosGanhos} grãos! Nível atual: ${novoNivel}`
