@@ -5,19 +5,80 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>The Bear</title>
   <link rel="stylesheet" href="style.css" />
+  <style>
+    html {
+      scroll-behavior: smooth;
+    }
+    section {
+      padding: 3rem 2rem;
+      border-bottom: 1px solid #ddd;
+    }
+    .navbar-buttons {
+      display: flex;
+      gap: 0.5rem;
+    }
+    .navbar-buttons button {
+      background: white;
+      color: #4b2e2e;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .navbar-buttons button:hover {
+      background: #fff2e6;
+    }
+  </style>
 </head>
 <body>
   <nav>
     <h1>The Bear</h1>
     <ul>
-      <li><a href="menu.html">📋 Cardápio</a></li>
+      <li><a href="#home">🏠 Home</a></li>
+      <li><a href="#about">📖 Sobre</a></li>
+      <li><a href="#menu">📋 Menu</a></li>
+      <li><a href="#contact">📞 Contato</a></li>
+      <li><a href="menu.html">🍽️ Cardápio</a></li>
       <li><a href="purchase.html">🛒 Compras</a></li>
       <li><a href="missions.html">🎯 Missões</a></li>
     </ul>
+    <div class="navbar-buttons">
+      <button onclick="location.href='register.html'">Criar Conta</button>
+      <button onclick="location.href='login.html'">Login</button>
+    </div>
   </nav>
+
   <main>
-    <h2>Bem-vindo a THE BEAR</h2>
-    <p>Escolha uma das opções acima para começar.</p>
+    <section id="home">
+      <h2>Bem-vindo à THE BEAR</h2>
+      <p>Explore, compre, evolua e viva experiências incríveis com cafés, pratos e recompensas exclusivas.</p>
+    </section>
+
+    <section id="about">
+      <h2>Sobre Nós</h2>
+      <p>Somos uma cafeteria com alma de RPG. Cada visita é uma missão e cada pedido, uma jornada. Nosso sistema de gamificação transforma sua rotina em aventura!</p>
+    </section>
+
+    <section id="menu">
+      <h2>Nosso Menu</h2>
+      <p>Oferecemos uma variedade de delícias, divididas em categorias como:</p>
+      <ul>
+        <li><strong>Bebidas com Café</strong> – Espresso, cappuccino, mocha e mais.</li>
+        <li><strong>Chás</strong> – Naturais, florais e funcionais.</li>
+        <li><strong>Pratos Salgados</strong> – Lanches artesanais e refeições leves.</li>
+        <li><strong>Sobremesas</strong> – Tortas, cookies, brownies e outros mimos doces.</li>
+      </ul>
+      <p>Explore o cardápio completo na aba <strong>Cardápio</strong> acima.</p>
+    </section>
+
+    <section id="contact">
+      <h2>Contato</h2>
+      <p>📍 Rua do Café, 123 - Centro, Caféville</p>
+      <p>📞 (11) 1234-5678</p>
+      <p>📧 contato@thebearjourney.com</p>
+      <p>Siga-nos no Instagram <strong>@thebearjourney</strong> 🐻</p>
+    </section>
   </main>
 </body>
 </html>

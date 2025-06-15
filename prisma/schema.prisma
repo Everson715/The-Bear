@@ -8,18 +8,11 @@ datasource db {
 }
 
 model MenuItem {
-  id        Int      @id @default(autoincrement())
+  id        Int        @id @default(autoincrement())
   name      String
   category  String
   price     Float
   purchases Purchase[]
-}
-
-model Purchase {
-  id         Int       @id @default(autoincrement())
-  menuItemId Int
-  createdAt  DateTime  @default(now())
-  menuItem   MenuItem  @relation(fields: [menuItemId], references: [id])
 }
 
 model Mission {
@@ -27,4 +20,31 @@ model Mission {
   description String
   category    String
   completed   Boolean @default(false)
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  message   String
+  read      Boolean  @default(false) // Adicionei campo read para controle de leitura
+  createdAt DateTime @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+}
+
+model Purchase {
+  id         Int      @id @default(autoincrement())
+  menuItemId Int
+  userId     String // adiciona a FK para usuário
+  createdAt  DateTime @default(now())
+
+  menuItem MenuItem @relation(fields: [menuItemId], references: [id])
+  user     User     @relation(fields: [userId], references: [id])
+}
+
+model User {
+  id            String         @id @default(uuid())
+  email         String         @unique
+  purchases     Purchase[] // relação inversa para compras
+  notifications Notification[]
 }
