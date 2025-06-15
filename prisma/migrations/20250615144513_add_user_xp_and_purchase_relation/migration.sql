@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "User" ADD COLUMN     "coffeeBeans" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "level" TEXT NOT NULL DEFAULT 'Urso Curioso',
+ADD COLUMN     "xp" INTEGER NOT NULL DEFAULT 0;

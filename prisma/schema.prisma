@@ -32,19 +32,22 @@ model Notification {
   user   User   @relation(fields: [userId], references: [id])
 }
 
-model Purchase {
-  id         Int      @id @default(autoincrement())
-  menuItemId Int
-  userId     String // adiciona a FK para usuário
-  createdAt  DateTime @default(now())
-
-  menuItem MenuItem @relation(fields: [menuItemId], references: [id])
-  user     User     @relation(fields: [userId], references: [id])
-}
-
 model User {
   id            String         @id @default(uuid())
   email         String         @unique
-  purchases     Purchase[] // relação inversa para compras
+  xp            Int            @default(0)
+  coffeeBeans   Int            @default(0)
+  level         String         @default("Urso Curioso")
   notifications Notification[]
+  purchases     Purchase[]
+}
+
+model Purchase {
+  id         Int       @id @default(autoincrement())
+  menuItemId Int
+  userId     String
+  createdAt  DateTime  @default(now())
+
+  menuItem   MenuItem  @relation(fields: [menuItemId], references: [id])
+  user       User      @relation(fields: [userId], references: [id])
 }
