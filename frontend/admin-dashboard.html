@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dashboard Admin</title>
+</head>
+<body>
+  <h1>Painel do Administrador</h1>
+
+  <h2>Adicionar Item ao Menu</h2>
+  <form id="menu-form">
+    <input type="text" name="name" placeholder="Nome" required />
+    <input type="text" name="category" placeholder="Categoria" required />
+    <input type="number" name="price" placeholder="Preço" step="0.01" required />
+    <input type="text" name="image" placeholder="URL da Imagem" />
+    <textarea name="description" placeholder="Descrição"></textarea>
+    <button type="submit">Criar</button>
+  </form>
+
+  <h2>Itens no Menu</h2>
+  <ul id="menu-list"></ul>
+
+  <script>
+    const userId = localStorage.getItem("userId");
+    const headers = { "Content-Type": "application/json", "user-id": userId };
+
+    async function loadMenu() {
+      const res = await fetch("http://localhost:3000/menu");
+      const items = await res.json();
+
+      const list = document.getElementById("menu-list");
+      list.innerHTML = "";
+      items.forEach(item => {
+        const li = document.createElement("li");
+        li.innerHTML = `
+          <img src="${item.image}" width="50" />
+          <strong>${item.name}</strong> - ${item.category} - R$ ${item.price}
+          <p>${item.description}</p>
+          <button onclick="deleteItem(${item.id})">Excluir</button>
+        `;
+        list.appendChild(li);
+      });
+    }
+
+    document.getElementById("menu-form").addEventListener("submit", async e => {
+      e.preventDefault();
+      const form = e.target;
+      const data = {
+        name: form.name.value,
+        category: form.category.value,
+        price: parseFloat(form.price.value),
+        image: form.image.value,
+        description: form.description.value
+      };
+      await fetch("http://localhost:3000/menu", {
+        method: "POST",
+        headers,
+        body: JSON.stringify(data)
+      });
+      form.reset();
+      loadMenu();
+    });
+
+    async function deleteItem(id) {
+      await fetch(`http://localhost:3000/menu/${id}`, {
+        method: "DELETE",
+        headers
+      });
+      loadMenu();
+    }
+
+    loadMenu();
+  </script>
+</body>
+</html>

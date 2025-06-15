@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <title>Registrar Compra - The Bear Journey</title>
   <link rel="stylesheet" href="style.css" />
-  <script defer src="./scripts/purchase.js"></script>
 </head>
 <body>
   <nav>
@@ -17,24 +16,95 @@
   </nav>
 
   <main>
-    <h2>Registrar Compra</h2>
-    <form id="purchaseForm">
-      <label for="userId">ID do Usuário:</label>
-      <input type="text" id="userId" required />
+    <section id="menu-section">
+      <h2>Cardápio</h2>
+      <div id="menu-container"></div>
+    </section>
 
-      <label for="menuItemId">ID do Item do Menu:</label>
-      <input type="text" id="menuItemId" required />
-
-      <label for="quantity">Quantidade:</label>
-      <input type="number" id="quantity" min="1" value="1" required />
-
-      <button type="submit">Registrar</button>
-    </form>
-
-    <h2>Compras Realizadas</h2>
-    <ul id="purchase-list"></ul>
-
-    <div id="result"></div>
+    <section id="cart-section">
+      <h2>Carrinho</h2>
+      <ul id="cart-items"></ul>
+      <p>Total: R$ <span id="cart-total">0.00</span></p>
+      <button onclick="finalizarCompra()">Finalizar Compra</button>
+    </section>
   </main>
+
+  <script>
+    let carrinho = [];
+
+    function adicionarAoCarrinho(item) {
+      carrinho.push(item);
+      renderCarrinho();
+    }
+
+    function renderCarrinho() {
+      const lista = document.getElementById("cart-items");
+      lista.innerHTML = "";
+      let total = 0;
+
+      carrinho.forEach((item, index) => {
+        total += item.price;
+        const li = document.createElement("li");
+        li.textContent = `${item.name} - R$ ${item.price.toFixed(2)}`;
+        const btn = document.createElement("button");
+        btn.innerText = "Remover";
+        btn.onclick = () => {
+          carrinho.splice(index, 1);
+          renderCarrinho();
+        };
+        li.appendChild(btn);
+        lista.appendChild(li);
+      });
+
+      document.getElementById("cart-total").innerText = total.toFixed(2);
+    }
+
+    async function finalizarCompra() {
+      const userId = localStorage.getItem("userId");
+      if (!userId) {
+        alert("Usuário não identificado.");
+        return;
+      }
+
+      for (const item of carrinho) {
+        await fetch("http://localhost:3000/purchases", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "user-id": userId
+          },
+          body: JSON.stringify({ menuItemId: item.id, userId })
+        });
+      }
+
+      alert("Compra finalizada!");
+      carrinho = [];
+      renderCarrinho();
+    }
+
+    async function carregarMenu() {
+      try {
+        const res = await fetch("http://localhost:3000/menu");
+        const items = await res.json();
+        const container = document.getElementById("menu-container");
+
+        items.forEach(item => {
+          const card = document.createElement("div");
+          card.innerHTML = `
+            <img src="${item.imageUrl}" width="100" />
+            <h3>${item.name}</h3>
+            <p>${item.description}</p>
+            <p>R$ ${item.price.toFixed(2)}</p>
+            <button onclick='adicionarAoCarrinho(${JSON.stringify(item)})'>Adicionar</button>
+          `;
+          container.appendChild(card);
+        });
+      } catch (err) {
+        console.error("Erro ao carregar o menu:", err);
+      }
+    }
+
+    carregarMenu();
+  </script>
 </body>
 </html>
