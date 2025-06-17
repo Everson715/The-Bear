@@ -142,8 +142,3 @@ Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para mais detalh
 * A São Bento, São Miguel Arcanjo, Nossa Senhora das Dores e São José, por guiarem os caminhos do criador deste projeto.
 
 ---
-
-```
-
-Se quiser, posso gerar esse README direto como arquivo `.md`. Deseja isso também?
-```
