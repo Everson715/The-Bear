@@ -1,30 +1,31 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>Missões</title>
-  <link rel="stylesheet" href="style.css">
-  <script src="scripts/missions.js" defer></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Missões - The Bear</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <nav>
-    <h1>The Bear Journey</h1>
+    <h1>The Bear</h1>
     <ul>
-      <li><a href="index.html">🏠 Início</a></li>
-      <li><a href="menu.html">📋 Cardápio</a></li>
-      <li><a href="purchase.html">🛒 Compras</a></li>
+      <li><a href="index.html#home">🏠 Home</a></li>
+      <li><a href="index.html#about">📖 Sobre</a></li>
+      <li><a href="index.html#menu">📋 Menu</a></li>
+      <li><a href="index.html#contact">📞 Contato</a></li>
     </ul>
+    <div class="navbar-buttons">
+      <button onclick="location.href='register.html'">Criar Conta</button>
+      <button onclick="location.href='login.html'">Login</button>
+      <button id="logoutBtn" style="display: none;">Sair</button>
+    </div>
   </nav>
-
   <main>
-    <h2>Missões</h2>
-
-    <label for="userId">Digite seu ID:</label>
-    <input type="text" id="userId "/>
-    <button onclick="carregarMissoes()">carregar Missões</button>
-
-    <ul id="missionsList"></ul>
-
+    <h2>Missões Ativas</h2>
+    <div id="missionsList"></div>
   </main>
+  <script src="./scripts/logout.js"></script>
+  <script src="./scripts/missions.js"></script>
 </body>
 </html>

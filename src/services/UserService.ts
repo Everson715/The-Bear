@@ -35,7 +35,8 @@ export class UserService {
         password: true,
         xp: true,
         coffeeBeans: true,
-        level: true
+        level: true,
+        isAdmin: true
       }
     });
 
@@ -52,7 +53,10 @@ export class UserService {
 
     const { password: _, ...userWithoutPassword } = user;
 
-    return { user: userWithoutPassword, token };
+    return {
+      user: userWithoutPassword,
+      token
+    };
   }
 
   async findById(id: string) {

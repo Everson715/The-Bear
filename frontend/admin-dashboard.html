@@ -3,43 +3,78 @@
 <head>
   <meta charset="UTF-8" />
   <title>Dashboard Admin</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1>Painel do Administrador</h1>
+  <nav>
+    <h1>The Bear</h1>
+    <ul>
+      <li><a href="index.html">🏠 Home</a></li>
+      <li><a href="menu.html">🍽️ Cardápio</a></li>
+      <li><a href="purchase.html">🛒 Compras</a></li>
+      <li><a href="missions.html">🎯 Missões</a></li>
+    </ul>
+    <div class="navbar-buttons">
+      <button id="logoutBtn">Sair</button>
+    </div>
+  </nav>
 
-  <h2>Adicionar Item ao Menu</h2>
-  <form id="menu-form">
-    <input type="text" name="name" placeholder="Nome" required />
-    <input type="text" name="category" placeholder="Categoria" required />
-    <input type="number" name="price" placeholder="Preço" step="0.01" required />
-    <input type="text" name="image" placeholder="URL da Imagem" />
-    <textarea name="description" placeholder="Descrição"></textarea>
-    <button type="submit">Criar</button>
-  </form>
+  <main>
+    <h1>Painel do Administrador</h1>
 
-  <h2>Itens no Menu</h2>
-  <ul id="menu-list"></ul>
+    <h2>Adicionar Item ao Menu</h2>
+    <form id="menu-form">
+      <input type="text" name="name" placeholder="Nome" required />
+      <input type="text" name="category" placeholder="Categoria" required />
+      <input type="number" name="price" placeholder="Preço" step="0.01" required />
+      <input type="text" name="image" placeholder="URL da Imagem" />
+      <textarea name="description" placeholder="Descrição"></textarea>
+      <button type="submit">Criar</button>
+    </form>
+
+    <h2>Itens no Menu</h2>
+    <ul id="menu-list"></ul>
+  </main>
 
   <script>
     const userId = localStorage.getItem("userId");
-    const headers = { "Content-Type": "application/json", "user-id": userId };
+    const isAdmin = localStorage.getItem("isAdmin") === "true";
+
+    if (!userId || isAdmin) {
+      alert("Acesso negado. Você precisa ser um administrador.");
+      window.location.href = "index.html";
+    }
+
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+      localStorage.clear();
+      window.location.href = "index.html";
+    });
+
+    const headers = {
+      "Content-Type": "application/json",
+      "user-id": userId
+    };
 
     async function loadMenu() {
-      const res = await fetch("http://localhost:3000/menu");
-      const items = await res.json();
+      try {
+        const res = await fetch("http://localhost:3000/menu");
+        const items = await res.json();
 
-      const list = document.getElementById("menu-list");
-      list.innerHTML = "";
-      items.forEach(item => {
-        const li = document.createElement("li");
-        li.innerHTML = `
-          <img src="${item.image}" width="50" />
-          <strong>${item.name}</strong> - ${item.category} - R$ ${item.price}
-          <p>${item.description}</p>
-          <button onclick="deleteItem(${item.id})">Excluir</button>
-        `;
-        list.appendChild(li);
-      });
+        const list = document.getElementById("menu-list");
+        list.innerHTML = "";
+        items.forEach(item => {
+          const li = document.createElement("li");
+          li.innerHTML = `
+            <img src="${item.image}" width="50" />
+            <strong>${item.name}</strong> - ${item.category} - R$ ${item.price.toFixed(2)}
+            <p>${item.description}</p>
+            <button onclick="deleteItem(${item.id})">Excluir</button>
+          `;
+          list.appendChild(li);
+        });
+      } catch (err) {
+        console.error("Erro ao carregar menu:", err);
+      }
     }
 
     document.getElementById("menu-form").addEventListener("submit", async e => {
@@ -52,21 +87,29 @@
         image: form.image.value,
         description: form.description.value
       };
-      await fetch("http://localhost:3000/menu", {
-        method: "POST",
-        headers,
-        body: JSON.stringify(data)
-      });
-      form.reset();
-      loadMenu();
+      try {
+        await fetch("http://localhost:3000/menu", {
+          method: "POST",
+          headers,
+          body: JSON.stringify(data)
+        });
+        form.reset();
+        loadMenu();
+      } catch (err) {
+        console.error("Erro ao criar item:", err);
+      }
     });
 
     async function deleteItem(id) {
-      await fetch(`http://localhost:3000/menu/${id}`, {
-        method: "DELETE",
-        headers
-      });
-      loadMenu();
+      try {
+        await fetch(`http://localhost:3000/menu/${id}`, {
+          method: "DELETE",
+          headers
+        });
+        loadMenu();
+      } catch (err) {
+        console.error("Erro ao excluir item:", err);
+      }
     }
 
     loadMenu();
