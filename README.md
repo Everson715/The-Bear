@@ -1,5 +1,5 @@
 
-# 🐻 The Bear - Sistema Gamificado para Cafeteria
+# The Bear - Sistema Gamificado para Cafeteria
 
 **The Bear** é uma aplicação web gamificada desenvolvida para a cafeteria **The Bear**, que transforma compras em uma jornada de recompensas. Os clientes acumulam XP e Grãos de Café a cada compra e podem desbloquear níveis com prêmios.
 
