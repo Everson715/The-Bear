@@ -1,0 +1,127 @@
+/* Estilos específicos para as páginas de Login e Registro */
+
+.auth-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 180px); /* Ajusta a altura mínima para o conteúdo */
+    background-color: var(--bg-light); /* Cor de fundo suave */
+    padding: 40px 20px;
+}
+
+.auth-form-container {
+    background-color: #fff;
+    padding: 50px 40px;
+    border-radius: 10px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 450px; /* Limita a largura do formulário */
+    text-align: center;
+}
+
+.auth-form-container h2 {
+    font-size: 2.2em;
+    color: var(--primary-color);
+    margin-bottom: 30px;
+    font-family: 'Playfair Display', serif;
+}
+
+#loginForm,
+#registerForm { /* Use a mesma estilização para ambos os formulários */
+    display: flex;
+    flex-direction: column;
+    gap: 20px; /* Espaço entre os campos */
+}
+
+.form-group {
+    text-align: left; /* Alinha labels à esquerda */
+}
+
+.form-group label {
+    display: block; /* Garante que a label ocupe sua própria linha */
+    font-size: 1em;
+    color: var(--text-color-dark);
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1em;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-group input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.2); /* Sombra de foco colorida */
+    outline: none;
+}
+
+.auth-form-container .btn-primary {
+    width: 100%; /* Botão ocupa a largura total */
+    padding: 14px 20px;
+    font-size: 1.1em;
+    margin-top: 15px; /* Espaço acima do botão */
+}
+
+.auth-link {
+    margin-top: 25px;
+    font-size: 1em;
+    color: var(--text-color-dark);
+}
+
+.auth-link a {
+    color: var(--secondary-color);
+    text-decoration: none;
+    font-weight: 700;
+    transition: color 0.3s ease;
+}
+
+.auth-link a:hover {
+    color: var(--primary-color);
+    text-decoration: underline;
+}
+
+/* Responsividade para Telas Menores */
+@media (max-width: 768px) {
+    .auth-page {
+        padding: 30px 15px;
+    }
+
+    .auth-form-container {
+        padding: 35px 25px;
+    }
+
+    .auth-form-container h2 {
+        font-size: 2em;
+        margin-bottom: 25px;
+    }
+
+    .form-group label {
+        font-size: 0.95em;
+    }
+
+    .form-group input {
+        padding: 10px 12px;
+        font-size: 0.95em;
+    }
+
+    .auth-form-container .btn-primary {
+        padding: 12px 18px;
+        font-size: 1em;
+    }
+}
+
+@media (max-width: 480px) {
+    .auth-form-container {
+        padding: 25px 20px;
+    }
+
+    .auth-form-container h2 {
+        font-size: 1.8em;
+    }
+}

@@ -1,3 +1,4 @@
+// src/controllers/menuController.ts
 import { Request, Response } from "express";
 import { MenuItemService } from "../services/MenuItemService";
 
@@ -5,8 +6,12 @@ const service = new MenuItemService();
 
 export const menuController = {
   async getAll(req: Request, res: Response) {
-    const items = await service.getAll();
-    res.json(items);
+    try {
+      const items = await service.getAll();
+      res.json(items);
+    } catch (e: any) {
+      res.status(500).json({ error: "Erro ao buscar o cardápio." });
+    }
   },
 
   async create(req: Request, res: Response) {
@@ -15,7 +20,7 @@ export const menuController = {
       const newItem = await service.create({ name, category, price, imageUrl, description });
       res.status(201).json(newItem);
     } catch (e: any) {
-      res.status(400).json({ error: e.message });
+      res.status(400).json({ error: e.message || "Erro ao criar item do menu." });
     }
   },
 
@@ -26,7 +31,7 @@ export const menuController = {
       const updated = await service.update(+id, { name, category, price, imageUrl, description });
       res.json(updated);
     } catch (e: any) {
-      res.status(400).json({ error: e.message });
+      res.status(400).json({ error: e.message || "Erro ao atualizar item." });
     }
   },
 
@@ -36,7 +41,7 @@ export const menuController = {
       await service.remove(+id);
       res.status(204).end();
     } catch (e: any) {
-      res.status(400).json({ error: e.message });
+      res.status(400).json({ error: e.message || "Erro ao remover item." });
     }
   }
 };

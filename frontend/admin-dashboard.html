@@ -2,117 +2,201 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <title>Dashboard Admin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>The Bear | Dashboard Admin</title>
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="admin-dashboard.css" /> 
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 </head>
+
 <body>
-  <nav>
-    <h1>The Bear</h1>
-    <ul>
-      <li><a href="index.html">🏠 Home</a></li>
-      <li><a href="menu.html">🍽️ Cardápio</a></li>
-      <li><a href="purchase.html">🛒 Compras</a></li>
-      <li><a href="missions.html">🎯 Missões</a></li>
-    </ul>
-    <div class="navbar-buttons">
-      <button id="logoutBtn">Sair</button>
+  <header>
+    <div class="container">
+        <div class="logo">
+            <h1>The Bear</h1>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="index.html">🏠 Home</a></li>
+                <li><a href="menu.html">🍽️ Cardápio</a></li>
+                <li><a href="purchase.html">🛒 Compras</a></li>
+                <li><a href="missions.html">🎯 Missões</a></li>
+                </ul>
+        </nav>
+        <div class="navbar-buttons">
+            <button class="btn-primary" id="logoutBtn">Sair</button>
+        </div>
     </div>
-  </nav>
+  </header>
 
-  <main>
-    <h1>Painel do Administrador</h1>
+  <main class="container admin-dashboard">
+    <h2>Painel do Administrador</h2>
 
-    <h2>Adicionar Item ao Menu</h2>
-    <form id="menu-form">
-      <input type="text" name="name" placeholder="Nome" required />
-      <input type="text" name="category" placeholder="Categoria" required />
-      <input type="number" name="price" placeholder="Preço" step="0.01" required />
-      <input type="text" name="image" placeholder="URL da Imagem" />
-      <textarea name="description" placeholder="Descrição"></textarea>
-      <button type="submit">Criar</button>
-    </form>
+    <section class="admin-section">
+      <h3>Adicionar Item ao Menu</h3>
+      <form id="menu-form">
+        <input type="text" name="name" placeholder="Nome do Item" required />
+        <input type="text" name="category" placeholder="Categoria (Ex: bebidas-cafe, salgados)" required />
+        <input type="number" name="price" placeholder="Preço (Ex: 15.99)" step="0.01" required />
+        <input type="url" name="image" placeholder="URL da Imagem (Ex: https://via.placeholder.com/150)" />
+        <textarea name="description" placeholder="Descrição detalhada do item"></textarea>
+        <button type="submit" class="btn-primary">Criar Item</button>
+      </form>
+    </section>
 
-    <h2>Itens no Menu</h2>
-    <ul id="menu-list"></ul>
+    <hr> 
+    
+    <section class="admin-section">
+      <h3>Itens no Menu</h3>
+      <div id="menu-list-container">
+        <ul id="menu-list">
+          </ul>
+      </div>
+    </section>
   </main>
 
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-brand">
+        <h3>The Bear</h3>
+        <p>Transformando cafés em aventuras.</p>
+      </div>
+
+      <div class="footer-social">
+        <h4>Redes Sociais</h4>
+        <a href="https://www.instagram.com/everson.syfy_7/" target="_blank" rel="noopener noreferrer">
+          <i class="fab fa-instagram"></i> Instagram
+        </a>
+        <a href="https://github.com/Everson715" target="_blank" rel="noopener noreferrer">
+          <i class="fab fa-github"></i> GitHub
+        </a>
+        <a href="https://www.linkedin.com/in/josé-everson" target="_blank" rel="noopener noreferrer">
+            <i class="fab fa-linkedin"></i> LinkedIn
+        </a>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>© <span id="current-year"></span> The Bear. Todos os direitos reservados.</p>
+      <p>Power by <strong>Artorias</strong>.</p>
+    </div>
+  </footer>
+
   <script>
-    const userId = localStorage.getItem("userId");
-    const isAdmin = localStorage.getItem("isAdmin") === "true";
+    document.addEventListener('DOMContentLoaded', () => {
+      // Update footer year
+      document.getElementById("current-year").textContent = new Date().getFullYear();
 
-    if (!userId || isAdmin) {
-      alert("Acesso negado. Você precisa ser um administrador.");
-      window.location.href = "index.html";
-    }
+      const userId = localStorage.getItem("userId");
+      const isAdmin = localStorage.getItem("isAdmin") === "true";
 
-    document.getElementById("logoutBtn").addEventListener("click", () => {
-      localStorage.clear();
-      window.location.href = "index.html";
-    });
-
-    const headers = {
-      "Content-Type": "application/json",
-      "user-id": userId
-    };
-
-    async function loadMenu() {
-      try {
-        const res = await fetch("http://localhost:3000/menu");
-        const items = await res.json();
-
-        const list = document.getElementById("menu-list");
-        list.innerHTML = "";
-        items.forEach(item => {
-          const li = document.createElement("li");
-          li.innerHTML = `
-            <img src="${item.image}" width="50" />
-            <strong>${item.name}</strong> - ${item.category} - R$ ${item.price.toFixed(2)}
-            <p>${item.description}</p>
-            <button onclick="deleteItem(${item.id})">Excluir</button>
-          `;
-          list.appendChild(li);
-        });
-      } catch (err) {
-        console.error("Erro ao carregar menu:", err);
+      if (!userId || !isAdmin) {
+        alert("Acesso negado. Você precisa ser um administrador.");
+        window.location.href = "index.html";
+        return; // Ensure script stops execution if access is denied
       }
-    }
 
-    document.getElementById("menu-form").addEventListener("submit", async e => {
-      e.preventDefault();
-      const form = e.target;
-      const data = {
-        name: form.name.value,
-        category: form.category.value,
-        price: parseFloat(form.price.value),
-        image: form.image.value,
-        description: form.description.value
+      document.getElementById("logoutBtn").addEventListener("click", () => {
+        localStorage.clear();
+        window.location.href = "index.html";
+      });
+
+      const headers = {
+        "Content-Type": "application/json",
+        "user-id": userId
       };
-      try {
-        await fetch("http://localhost:3000/menu", {
-          method: "POST",
-          headers,
-          body: JSON.stringify(data)
-        });
-        form.reset();
-        loadMenu();
-      } catch (err) {
-        console.error("Erro ao criar item:", err);
+
+      async function loadMenu() {
+        try {
+          const res = await fetch("http://localhost:3000/menu");
+          const items = await res.json();
+
+          const list = document.getElementById("menu-list");
+          list.innerHTML = "";
+          if (items.length === 0) {
+              list.innerHTML = '<p class="no-items-message">Nenhum item no menu ainda. Adicione um!</p>';
+              return;
+          }
+          items.forEach(item => {
+            const li = document.createElement("li");
+            li.className = 'admin-menu-item'; // Add class for future styling
+            li.innerHTML = `
+              <img src="${item.image || 'https://via.placeholder.com/100x100?text=Sem+Imagem'}" alt="${item.name}" />
+              <div class="item-details">
+                <h4>${item.name}</h4>
+                <p>Categoria: <strong>${item.category}</strong></p>
+                <p>Preço: <span>R$ ${item.price.toFixed(2)}</span></p>
+                <p class="description">${item.description || 'Sem descrição.'}</p>
+                <button onclick="deleteItem(${item.id})" class="btn-secondary delete-btn">Excluir</button>
+              </div>
+            `;
+            list.appendChild(li);
+          });
+        } catch (err) {
+          console.error("Erro ao carregar menu:", err);
+          const list = document.getElementById("menu-list");
+          list.innerHTML = '<p class="error-message">Não foi possível carregar os itens do menu. Verifique a conexão com a API.</p>';
+        }
       }
+
+      document.getElementById("menu-form").addEventListener("submit", async e => {
+        e.preventDefault();
+        const form = e.target;
+        const data = {
+          name: form.name.value,
+          category: form.category.value,
+          price: parseFloat(form.price.value),
+          image: form.image.value || 'https://via.placeholder.com/100x100?text=Novo+Item', // Default image if empty
+          description: form.description.value
+        };
+        try {
+          const res = await fetch("http://localhost:3000/menu", {
+            method: "POST",
+            headers,
+            body: JSON.stringify(data)
+          });
+          if (!res.ok) {
+              const errorText = await res.text();
+              throw new Error(`Erro ao criar item: ${res.status} - ${errorText}`);
+          }
+          form.reset();
+          loadMenu();
+          alert('Item adicionado com sucesso!');
+        } catch (err) {
+          console.error("Erro ao criar item:", err);
+          alert(`Erro ao adicionar item: ${err.message}`);
+        }
+      });
+
+      async function deleteItem(id) {
+        if (!confirm('Tem certeza que deseja excluir este item?')) {
+            return;
+        }
+        try {
+          const res = await fetch(`http://localhost:3000/menu/${id}`, {
+            method: "DELETE",
+            headers
+          });
+          if (!res.ok) {
+              const errorText = await res.text();
+              throw new Error(`Erro ao excluir item: ${res.status} - ${errorText}`);
+          }
+          loadMenu();
+          alert('Item excluído com sucesso!');
+        } catch (err) {
+          console.error("Erro ao excluir item:", err);
+          alert(`Erro ao excluir item: ${err.message}`);
+        }
+      }
+
+      // Make the deleteItem function global to be accessible from onclick
+      window.deleteItem = deleteItem;
+
+      loadMenu();
     });
-
-    async function deleteItem(id) {
-      try {
-        await fetch(`http://localhost:3000/menu/${id}`, {
-          method: "DELETE",
-          headers
-        });
-        loadMenu();
-      } catch (err) {
-        console.error("Erro ao excluir item:", err);
-      }
-    }
-
-    loadMenu();
   </script>
 </body>
 </html>

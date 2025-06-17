@@ -1,0 +1,187 @@
+/* Estilos específicos para o Dashboard Admin */
+
+.admin-dashboard {
+    padding: 60px 20px;
+    background-color: var(--bg-light);
+    min-height: calc(100vh - 180px); /* Ajusta a altura mínima para o conteúdo, considerando header e footer */
+}
+
+.admin-dashboard h2 {
+    font-size: 2.8em; /* Aumenta o tamanho do título principal */
+    color: var(--primary-color);
+    margin-bottom: 50px;
+    text-align: center;
+}
+
+.admin-section {
+    background-color: #fff;
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    margin-bottom: 40px; /* Espaço entre as seções */
+}
+
+.admin-section h3 {
+    font-size: 2em;
+    color: var(--secondary-color);
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+/* Estilo do formulário de adicionar item */
+#menu-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Espaço entre os campos do formulário */
+    max-width: 600px; /* Limita a largura do formulário */
+    margin: 0 auto; /* Centraliza o formulário */
+}
+
+#menu-form input,
+#menu-form textarea {
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1em;
+    width: 100%;
+}
+
+#menu-form textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+#menu-form button {
+    align-self: flex-end; /* Alinha o botão à direita */
+    width: auto; /* Ocupa apenas o espaço necessário */
+}
+
+/* Estilo da lista de itens do menu */
+#menu-list-container {
+    max-height: 500px; /* Altura máxima para a lista com scroll */
+    overflow-y: auto; /* Adiciona scroll se houver muitos itens */
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 15px;
+    background-color: var(--bg-light); /* Fundo para a área da lista */
+}
+
+#menu-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px; /* Espaço entre os itens da lista */
+}
+
+.admin-menu-item {
+    background-color: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 15px;
+    display: flex;
+    align-items: flex-start; /* Alinha itens ao topo */
+    gap: 15px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.admin-menu-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.admin-menu-item img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 5px;
+    flex-shrink: 0; /* Impede que a imagem encolha */
+}
+
+.admin-menu-item .item-details {
+    flex-grow: 1;
+}
+
+.admin-menu-item h4 {
+    font-size: 1.3em;
+    color: var(--primary-color);
+    margin-bottom: 5px;
+    text-align: left; /* Alinha o título do item à esquerda */
+}
+
+.admin-menu-item p {
+    font-size: 0.95em;
+    color: var(--text-color-dark);
+    margin-bottom: 5px;
+}
+
+.admin-menu-item p strong {
+    color: var(--secondary-color);
+}
+
+.admin-menu-item span {
+    font-weight: bold;
+    color: var(--primary-color);
+    font-size: 1.05em;
+}
+
+.admin-menu-item .description {
+    font-style: italic;
+    color: #555;
+    margin-top: 5px;
+    line-height: 1.4;
+}
+
+.admin-menu-item .delete-btn {
+    margin-top: 10px;
+    align-self: flex-start; /* Alinha o botão de exclusão com o topo do item-details */
+    font-size: 0.9em;
+    padding: 8px 15px;
+}
+
+/* Mensagens de estado */
+.no-items-message, .error-message {
+    text-align: center;
+    font-style: italic;
+    color: #777;
+    padding: 20px;
+}
+
+/* Responsividade para o Dashboard Admin */
+@media (max-width: 768px) {
+    .admin-dashboard h2 {
+        font-size: 2.2em;
+    }
+
+    .admin-section {
+        padding: 25px;
+    }
+
+    .admin-section h3 {
+        font-size: 1.8em;
+    }
+
+    .admin-menu-item {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .admin-menu-item img {
+        margin-bottom: 10px;
+    }
+
+    .admin-menu-item .item-details {
+        text-align: center;
+    }
+
+    .admin-menu-item .delete-btn {
+        align-self: center; /* Centraliza o botão em telas menores */
+    }
+}
+
+@media (max-width: 480px) {
+    .admin-dashboard {
+        padding: 30px 15px;
+    }
+}

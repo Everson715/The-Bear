@@ -1,0 +1,199 @@
+/* Estilos específicos para a página de Cardápio Completo (menu.html) */
+
+.menu-full-page {
+    padding: 60px 20px;
+    background-color: var(--bg-light);
+    min-height: calc(100vh - 180px); /* Ajusta a altura mínima para o conteúdo */
+}
+
+.menu-full-page h2 {
+    font-size: 3em;
+    color: var(--primary-color);
+    margin-bottom: 20px;
+    text-align: center;
+    font-family: 'Playfair Display', serif;
+}
+
+.menu-intro-text {
+    text-align: center;
+    font-size: 1.1em;
+    color: var(--text-color-dark);
+    margin-bottom: 40px;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.6;
+}
+
+/* Estilos para os botões de filtro de categoria */
+.menu-category-filter {
+    display: flex;
+    flex-wrap: wrap; /* Permite que os botões quebrem linha */
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 50px;
+}
+
+.menu-filter-btn {
+    background-color: var(--secondary-color);
+    color: #fff;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 5px;
+    font-size: 1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    flex-shrink: 0; /* Impede que os botões encolham */
+}
+
+.menu-filter-btn:hover {
+    background-color: var(--primary-color);
+    transform: translateY(-2px);
+}
+
+.menu-filter-btn.active {
+    background-color: var(--primary-color);
+    box-shadow: 0 4px 10px rgba(var(--primary-rgb), 0.3);
+}
+
+/* Estilos para a lista de itens do cardápio */
+#menuListContainer {
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+}
+
+#menuList {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.menu-item-card {
+    background-color: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden; /* Garante que a imagem arredondada não vaze */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.07);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column; /* Organiza conteúdo verticalmente */
+}
+
+.menu-item-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+}
+
+.menu-item-card img {
+    width: 100%;
+    height: 200px; /* Altura fixa para as imagens */
+    object-fit: cover; /* Corta a imagem para preencher o espaço */
+    display: block; /* Remove espaço extra abaixo da imagem */
+    border-bottom: 1px solid var(--border-color);
+}
+
+.menu-item-card .item-info {
+    padding: 20px;
+    flex-grow: 1; /* Permite que o conteúdo ocupe o espaço restante */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Espaça o conteúdo */
+}
+
+.menu-item-card h4 {
+    font-size: 1.5em;
+    color: var(--primary-color);
+    margin-bottom: 10px;
+    font-family: 'Playfair Display', serif;
+    text-align: left;
+}
+
+.menu-item-card p {
+    font-size: 0.95em;
+    color: var(--text-color-dark);
+    line-height: 1.5;
+    margin-bottom: 15px;
+    flex-grow: 1; /* Permite que a descrição ocupe mais espaço */
+    text-align: left;
+}
+
+.menu-item-card .price {
+    font-size: 1.3em;
+    font-weight: 700;
+    color: var(--secondary-color);
+    text-align: right; /* Alinha o preço à direita */
+    display: block;
+    margin-top: 10px;
+}
+
+/* Mensagem de nenhum item */
+.no-items-message {
+    text-align: center;
+    font-style: italic;
+    color: #777;
+    padding: 30px;
+    font-size: 1.1em;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .menu-full-page h2 {
+        font-size: 2.5em;
+    }
+
+    .menu-intro-text {
+        font-size: 1em;
+        margin-bottom: 30px;
+    }
+
+    .menu-filter-btn {
+        padding: 10px 20px;
+        font-size: 0.95em;
+    }
+
+    #menuList {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+    }
+
+    .menu-item-card img {
+        height: 180px;
+    }
+}
+
+@media (max-width: 480px) {
+    .menu-full-page {
+        padding: 40px 15px;
+    }
+
+    .menu-full-page h2 {
+        font-size: 2em;
+    }
+
+    .menu-intro-text {
+        font-size: 0.9em;
+    }
+
+    .menu-category-filter {
+        flex-direction: column; /* Botões de filtro em coluna */
+        gap: 10px;
+    }
+
+    .menu-filter-btn {
+        width: 100%; /* Botões de filtro em largura total */
+    }
+
+    #menuList {
+        grid-template-columns: 1fr; /* Um item por linha */
+    }
+
+    .menu-item-card img {
+        height: 150px;
+    }
+}

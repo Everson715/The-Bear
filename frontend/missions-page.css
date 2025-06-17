@@ -1,0 +1,237 @@
+/* Specific styles for the Missions page (missions.html) */
+
+.missions-page {
+    padding: 60px 20px;
+    background-color: var(--bg-light);
+    min-height: calc(100vh - 180px); /* Adjust min-height considering header and footer */
+}
+
+.missions-page h2 {
+    font-size: 3em;
+    color: var(--primary-color);
+    margin-bottom: 20px;
+    text-align: center;
+    font-family: 'Playfair Display', serif;
+}
+
+.missions-intro-text {
+    text-align: center;
+    font-size: 1.1em;
+    color: var(--text-color-dark);
+    margin-bottom: 50px;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.6;
+}
+
+/* Styles for the missions grid */
+.missions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    min-height: 300px; /* Minimum height for grid */
+    position: relative; /* For positioning messages */
+}
+
+.loading-message,
+.error-message,
+.no-missions-message {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    font-style: italic;
+    color: #777;
+    font-size: 1.1em;
+    width: 80%;
+}
+
+.error-message {
+    color: var(--danger-color);
+    font-weight: bold;
+}
+
+/* Styles for individual mission cards */
+.mission-card {
+    background-color: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 25px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.mission-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+}
+
+.mission-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.mission-card h3 {
+    font-size: 1.6em;
+    color: var(--primary-color);
+    font-family: 'Playfair Display', serif;
+    margin: 0;
+}
+
+.mission-status {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.85em;
+    font-weight: bold;
+    color: #fff;
+}
+
+.mission-status.mission-new {
+    background-color: #5bc0de; /* Info blue */
+}
+
+.mission-status.mission-in-progress {
+    background-color: var(--secondary-color); /* Orange/Yellow */
+}
+
+.mission-status.mission-completed {
+    background-color: var(--success-color); /* Green */
+}
+
+.mission-description {
+    font-size: 1em;
+    color: var(--text-color-dark);
+    line-height: 1.5;
+    margin-bottom: 20px;
+    flex-grow: 1; /* Allows description to take available space */
+}
+
+.mission-rewards {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    background-color: var(--bg-light);
+    border-radius: 8px;
+    padding: 10px 15px;
+    margin-bottom: 20px;
+    font-size: 1.05em;
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.mission-rewards span {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.mission-rewards .fas {
+    color: var(--secondary-color);
+    font-size: 1.2em;
+}
+
+/* Progress Bar */
+.mission-progress {
+    margin-bottom: 20px;
+}
+
+.progress-bar-background {
+    width: 100%;
+    height: 10px;
+    background-color: #e0e0e0;
+    border-radius: 5px;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background-color: var(--success-color); /* Green for progress */
+    border-radius: 5px;
+    transition: width 0.5s ease-in-out;
+}
+
+.progress-text {
+    font-size: 0.9em;
+    color: var(--text-color-dark);
+    text-align: right;
+    display: block;
+    font-weight: 500;
+}
+
+
+.complete-mission-btn {
+    width: 100%;
+    padding: 12px 20px;
+    font-size: 1.05em;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .missions-page h2 {
+        font-size: 2.5em;
+    }
+
+    .missions-intro-text {
+        font-size: 1em;
+        margin-bottom: 40px;
+    }
+
+    .missions-grid {
+        grid-template-columns: 1fr; /* Single column on smaller screens */
+        gap: 20px;
+    }
+
+    .mission-card {
+        padding: 20px;
+    }
+
+    .mission-card h3 {
+        font-size: 1.4em;
+    }
+
+    .mission-status {
+        font-size: 0.8em;
+        padding: 4px 10px;
+    }
+
+    .mission-rewards {
+        font-size: 0.95em;
+        padding: 8px 10px;
+    }
+
+    .complete-mission-btn {
+        font-size: 1em;
+        padding: 10px 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .missions-page {
+        padding: 40px 15px;
+    }
+
+    .missions-page h2 {
+        font-size: 2em;
+    }
+
+    .missions-intro-text {
+        font-size: 0.9em;
+    }
+
+    .mission-rewards {
+        flex-direction: column; /* Stack rewards vertically */
+        gap: 5px;
+        align-items: flex-start;
+    }
+}

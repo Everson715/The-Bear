@@ -3,29 +3,225 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Missões - The Bear</title>
+  <title>The Bear | Missões</title>
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="missions-page.css" /> <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 </head>
+
 <body>
-  <nav>
-    <h1>The Bear</h1>
-    <ul>
-      <li><a href="index.html#home">🏠 Home</a></li>
-      <li><a href="index.html#about">📖 Sobre</a></li>
-      <li><a href="index.html#menu">📋 Menu</a></li>
-      <li><a href="index.html#contact">📞 Contato</a></li>
-    </ul>
-    <div class="navbar-buttons">
-      <button onclick="location.href='register.html'">Criar Conta</button>
-      <button onclick="location.href='login.html'">Login</button>
-      <button id="logoutBtn" style="display: none;">Sair</button>
+  <header>
+    <div class="container">
+        <div class="logo">
+            <h1>The Bear</h1>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="index.html#home">Home</a></li>
+                <li><a href="index.html#about">Sobre</a></li>
+                <li><a href="index.html#menu">Menu</a></li>
+                <li><a href="index.html#contact">Contato</a></li>
+                <li><a href="missions.html">Missões</a></li> </ul>
+        </nav>
+        <div class="navbar-buttons">
+            <button class="btn-secondary" onclick="location.href='register.html'">Criar Conta</button>
+            <button class="btn-primary" onclick="location.href='login.html'">Login</button>
+            <button class="btn-primary" id="logoutBtn" style="display: none;">Sair</button>
+        </div>
     </div>
-  </nav>
-  <main>
+  </header>
+
+  <main class="container missions-page">
     <h2>Missões Ativas</h2>
-    <div id="missionsList"></div>
+    <p class="missions-intro-text">Embarque em jornadas desafiadoras para ganhar XP, grãos de café e recompensas exclusivas!</p>
+
+    <div id="missionsList" class="missions-grid">
+      <p id="loadingMessage" class="loading-message">Carregando missões...</p>
+      <p id="errorMessage" class="error-message" style="display: none;">Não foi possível carregar as missões. Tente novamente mais tarde.</p>
+      <p id="noMissionsMessage" class="no-missions-message" style="display: none;">Nenhuma missão ativa no momento. Volte mais tarde!</p>
+    </div>
   </main>
+
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-brand">
+        <h3>The Bear</h3>
+        <p>Transformando cafés em aventuras.</p>
+      </div>
+
+      <div class="footer-social">
+        <h4>Redes Sociais</h4>
+        <a href="https://www.instagram.com/everson.syfy_7/" target="_blank" rel="noopener noreferrer">
+          <i class="fab fa-instagram"></i> Instagram
+        </a>
+        <a href="https://github.com/Everson715" target="_blank" rel="noopener noreferrer">
+          <i class="fab fa-github"></i> GitHub
+        </a>
+        <a href="https://www.linkedin.com/in/josé-everson" target="_blank" rel="noopener noreferrer">
+            <i class="fab fa-linkedin"></i> LinkedIn
+        </a>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>© <span id="current-year"></span> The Bear. Todos os direitos reservados.</p>
+      <p>Power by <strong>Artorias</strong>.</p>
+    </div>
+  </footer>
+
   <script src="./scripts/logout.js"></script>
-  <script src="./scripts/missions.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Update footer year
+      document.getElementById("current-year").textContent = new Date().getFullYear();
+
+      const userId = localStorage.getItem("userId");
+      // You might want to ensure the user is logged in to view missions
+      if (!userId) {
+          // alert("Você precisa estar logado para ver suas missões.");
+          // window.location.href = "login.html"; // Redirect to login
+          // return;
+      }
+
+      // Logic to show/hide the Logout button
+      const logoutBtn = document.getElementById("logoutBtn");
+      if (userId) {
+          logoutBtn.style.display = "block";
+      } else {
+          logoutBtn.style.display = "none";
+      }
+
+      // --- Missions Page Logic (missions.js - Adapted here for example) ---
+      const missionsListDiv = document.getElementById('missionsList');
+      const loadingMessage = document.getElementById('loadingMessage');
+      const errorMessage = document.getElementById('errorMessage');
+      const noMissionsMessage = document.getElementById('noMissionsMessage');
+
+      let userMissions = []; // To store active missions for the user
+
+      async function fetchMissions() {
+        loadingMessage.style.display = 'block';
+        errorMessage.style.display = 'none';
+        noMissionsMessage.style.display = 'none';
+        missionsListDiv.innerHTML = ''; // Clear container before loading
+
+        try {
+          const token = localStorage.getItem("token"); // Get token from localStorage
+          if (!token) {
+            errorMessage.textContent = 'Você precisa estar logado para ver as missões.';
+            errorMessage.style.display = 'block';
+            loadingMessage.style.display = 'none';
+            return;
+          }
+
+          const response = await fetch('http://localhost:3000/api/missions/active', { // Adjust URL to your missions API endpoint
+            headers: {
+              'Authorization': `Bearer ${token}` // Include token in authorization header
+            }
+          });
+
+          if (!response.ok) {
+            throw new Error(`Error fetching missions: ${response.status}`);
+          }
+          userMissions = await response.json();
+          displayMissions(userMissions);
+        } catch (error) {
+          console.error('Error fetching missions:', error);
+          errorMessage.textContent = `Não foi possível carregar as missões: ${error.message || 'Verifique sua conexão.'}`;
+          errorMessage.style.display = 'block';
+        } finally {
+          loadingMessage.style.display = 'none';
+        }
+      }
+
+      // Function to display missions
+      function displayMissions(missionsToDisplay) {
+        if (missionsToDisplay.length === 0) {
+          noMissionsMessage.style.display = 'block';
+          return;
+        }
+
+        missionsToDisplay.forEach(mission => {
+          const missionCard = document.createElement('div');
+          missionCard.className = 'mission-card';
+          // Determine status color based on mission progress (assuming your API provides this)
+          let statusClass = '';
+          let statusText = '';
+          if (mission.status === 'completed') {
+            statusClass = 'mission-completed';
+            statusText = 'Concluída';
+          } else if (mission.status === 'in-progress') {
+            statusClass = 'mission-in-progress';
+            statusText = 'Em Andamento';
+          } else {
+            statusClass = 'mission-new';
+            statusText = 'Nova Missão';
+          }
+
+          missionCard.innerHTML = `
+            <div class="mission-header">
+              <h3>${mission.title}</h3>
+              <span class="mission-status ${statusClass}">${statusText}</span>
+            </div>
+            <p class="mission-description">${mission.description}</p>
+            <div class="mission-rewards">
+              <span><i class="fas fa-star"></i> XP: ${mission.xpReward}</span>
+              <span><i class="fas fa-seedling"></i> Grãos: ${mission.beansReward}</span>
+            </div>
+            <div class="mission-progress">
+                <div class="progress-bar-background">
+                    <div class="progress-bar-fill" style="width: ${mission.progressPercentage || 0}%"></div>
+                </div>
+                <span class="progress-text">${mission.progressPercentage || 0}% Concluído</span>
+            </div>
+            ${mission.status !== 'completed' ? `<button class="btn-primary complete-mission-btn" data-id="${mission.id}">Completar Missão</button>` : ''}
+          `;
+          missionsListDiv.appendChild(missionCard);
+        });
+
+        // Add event listeners for "Complete Mission" buttons
+        document.querySelectorAll('.complete-mission-btn').forEach(button => {
+          button.addEventListener('click', completeMission);
+        });
+      }
+
+      // Function to complete a mission
+      async function completeMission(event) {
+        const missionId = parseInt(event.target.dataset.id);
+        if (!confirm('Tem certeza que deseja completar esta missão?')) {
+            return;
+        }
+
+        try {
+          const token = localStorage.getItem("token");
+          const response = await fetch(`http://localhost:3000/api/missions/${missionId}/complete`, { // Adjust URL
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ userId: userId }) // Pass userId if your API requires it
+          });
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            throw new Error(data.error || 'Erro ao completar missão.');
+          }
+
+          alert(`Missão "${data.mission.title}" concluída! Você ganhou ${data.mission.xpReward} XP e ${data.mission.beansReward} Grãos!`);
+          fetchMissions(); // Reload missions to update status
+        } catch (error) {
+          console.error('Erro ao completar missão:', error);
+          alert(`Erro: ${error.message || 'Não foi possível completar a missão. Tente novamente.'}`);
+        }
+      }
+
+      // Load missions when the page loads
+      fetchMissions();
+    });
+  </script>
 </body>
 </html>

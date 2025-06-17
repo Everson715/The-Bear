@@ -5,125 +5,170 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>The Bear</title>
   <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
-
-  <style>
-    html {
-      scroll-behavior: smooth;
-    }
-    section {
-      padding: 3rem 2rem;
-      border-bottom: 1px solid #ddd;
-    }
-    .navbar-buttons {
-      display: flex;
-      gap: 0.5rem;
-    }
-    .navbar-buttons button {
-      background: white;
-      color: #4b2e2e;
-      border: none;
-      padding: 0.5rem 1rem;
-      border-radius: 5px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-    .navbar-buttons button:hover {
-      background: #fff2e6;
-    }
-
-    .footer {
-      background-color: #4b2e2e;
-      color: #fff;
-      padding: 2rem;
-      text-align: center;
-      font-family: sans-serif;
-    }
-
-    .footer-content {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-around;
-      gap: 2rem;
-      margin-bottom: 1rem;
-    }
-
-    .footer-content div {
-      min-width: 200px;
-    }
-
-    .footer h3, .footer h4 {
-      margin-bottom: 0.5rem;
-    }
-
-    .footer a {
-      color: #fff2e6;
-      text-decoration: none;
-      display: block;
-      margin: 0.25rem 0;
-      transition: color 0.3s;
-    }
-
-    .footer a:hover {
-      color: #ffd6a0;
-      text-decoration: underline;
-    }
-
-    .footer-bottom {
-      border-top: 1px solid #fff;
-      padding-top: 1rem;
-      font-size: 0.9rem;
-    }
-  </style>
 </head>
 
 <body>
-  <nav>
-    <h1>The Bear</h1>
-    <ul>
-      <li><a href="#home">🏠 Home</a></li>
-      <li><a href="#about">📖 Sobre</a></li>
-      <li><a href="#menu">📋 Menu</a></li>
-      <li><a href="#contact">📞 Contato</a></li>
-      <li><a href="menu.html">🍽️ Cardápio</a></li>
-      <li><a href="purchase.html">🛒 Compras</a></li>
-      <li><a href="missions.html">🎯 Missões</a></li>
-    </ul>
-    <div class="navbar-buttons">
-      <button onclick="location.href='register.html'">Criar Conta</button>
-      <button onclick="location.href='login.html'">Login</button>
-      <button id="logoutBtn" style="display: none;">Sair</button>
+  <header>
+    <div class="container">
+        <div class="logo">
+            <h1>The Bear</h1>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="#home">Home</a></li>
+                <li><a href="#about">Sobre</a></li>
+                <li><a href="#menu">Menu</a></li>
+                <li><a href="#contact">Contato</a></li>
+                <li><a href="menu.html">Cardápio</a></li>
+                <li><a href="purchase.html">Compras</a></li>
+                <li><a href="missions.html">Missões</a></li>
+            </ul>
+        </nav>
+        <div class="navbar-buttons">
+            <button class="btn-secondary" onclick="location.href='register.html'">Criar Conta</button>
+            <button class="btn-primary" onclick="location.href='login.html'">Login</button>
+            <button class="btn-primary" id="logoutBtn" style="display: none;">Sair</button>
+        </div>
     </div>
-  </nav>
+  </header>
 
-  <main>
-    <section id="home">
+  <section id="home" class="hero">
+    <div class="container">
       <h2>Bem-vindo à THE BEAR</h2>
       <p>Explore, compre, evolua e viva experiências incríveis com cafés, pratos e recompensas exclusivas.</p>
-    </section>
+      <a href="#menu" class="btn-secondary">Conheça Nossas Aventuras</a>
+    </div>
+  </section>
 
-    <section id="about">
-      <h2>Sobre Nós</h2>
+  <section id="about" class="about-us">
+    <div class="container">
+      <h3>Sobre Nós</h3>
       <p>Somos uma cafeteria com alma de RPG. Cada visita é uma missão e cada pedido, uma jornada. Nosso sistema de gamificação transforma sua rotina em aventura!</p>
-    </section>
+      <div class="about-features">
+        <div class="feature-item">
+            <i class="fas fa-gamepad"></i>
+            <h4>Gamificação</h4>
+            <p>Ganhe XP e grãos com cada compra e desbloqueie novas missões!</p>
+        </div>
+        <div class="feature-item">
+            <i class="fas fa-trophy"></i>
+            <h4>Recompensas Exclusivas</h4>
+            <p>Conquiste itens e vantagens únicas ao subir de nível.</p>
+        </div>
+        <div class="feature-item">
+            <i class="fas fa-route"></i>
+            <h4>Jornadas Épicas</h4>
+            <p>Participe de desafios e eventos temáticos que mudam a cada estação.</p>
+        </div>
+    </div>
+    </div>
+  </section>
 
-    <section id="menu">
-      <h2>Nosso Menu</h2>
-      <p>Oferecemos uma variedade de delícias, divididas em categorias como:</p>
-      <ul>
-        <li><strong>Bebidas com Café</strong> – Espresso, cappuccino, mocha e mais.</li>
-        <li><strong>Chás</strong> – Naturais, florais e funcionais.</li>
-        <li><strong>Pratos Salgados</strong> – Lanches artesanais e refeições leves.</li>
-        <li><strong>Sobremesas</strong> – Tortas, cookies, brownies e outros mimos doces.</li>
-      </ul>
-      <p>Explore o cardápio completo na aba <strong>Cardápio</strong> acima.</p>
-    </section>
+  <section id="menu" class="menu-section">
+    <div class="container">
+      <h3>Nosso Menu</h3>
+      <p>Oferecemos uma variedade de delícias para suas jornadas, divididas em categorias para facilitar sua exploração:</p>
+      <div class="menu-categories">
+        <button class="menu-btn active" data-category="bebidas-cafe">Bebidas com Café</button>
+        <button class="menu-btn" data-category="chas">Chás</button>
+        <button class="menu-btn" data-category="salgados">Pratos Salgados</button>
+        <button class="menu-btn" data-category="sobremesas">Sobremesas</button>
+      </div>
+      <div class="menu-items">
+        <div class="menu-category-content bebidas-cafe active">
+            <div class="menu-item">
+                <img src="https://via.placeholder.com/150x100?text=Elixir+Energia" alt="Elixir da Energia">
+                <div class="item-details">
+                    <h4>Elixir da Energia</h4>
+                    <p>Um shot duplo de espresso que te prepara para qualquer desafio.</p>
+                    <span>R$ 8,00</span>
+                </div>
+            </div>
+            <div class="menu-item">
+                <img src="https://via.placeholder.com/150x100?text=Cappuccino+Do+Urso" alt="Cappuccino do Urso">
+                <div class="item-details">
+                    <h4>Cappuccino do Urso</h4>
+                    <p>Cremoso e reconfortante, ideal para um momento de pausa.</p>
+                    <span>R$ 14,00</span>
+                </div>
+            </div>
+        </div>
 
-    <section id="contact">
-      <h2>Contato</h2>
-      <p>Fale conosco via redes sociais ou presencialmente na The Bear.</p>
-    </section>
-  </main>
+        <div class="menu-category-content chas">
+            <div class="menu-item">
+                <img src="https://via.placeholder.com/150x100?text=Infusao+Calma" alt="Infusão da Calma">
+                <div class="item-details">
+                    <h4>Infusão da Calma</h4>
+                    <p>Chá de camomila e erva-cidreira para relaxar após uma longa missão.</p>
+                    <span>R$ 10,00</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="menu-category-content salgados">
+            <div class="menu-item">
+                <img src="https://via.placeholder.com/150x100?text=Sanduiche+Aventureiro" alt="Sanduíche do Aventureiro">
+                <div class="item-details">
+                    <h4>Sanduíche do Aventureiro</h4>
+                    <p>Recheado com frango defumado e queijo, perfeito para repor as energias.</p>
+                    <span>R$ 18,00</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="menu-category-content sobremesas">
+            <div class="menu-item">
+                <img src="https://via.placeholder.com/150x100?text=Torta+Da+Conquista" alt="Torta da Conquista">
+                <div class="item-details">
+                    <h4>Torta da Conquista</h4>
+                    <p>Uma fatia generosa de torta de chocolate para celebrar suas vitórias.</p>
+                    <span>R$ 16,00</span>
+                </div>
+            </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact" class="contact-section">
+    <div class="container">
+      <h3>Fale Conosco</h3>
+      <div class="contact-content">
+        <div class="contact-info">
+            <p><i class="fas fa-map-marker-alt"></i> Rua da Aventura, 456, Centro, Surubim - PE</p>
+            <p><i class="fas fa-phone"></i> (81) 98888-7777</p>
+            <p><i class="fas fa-envelope"></i> contato@thebear.com</p>
+            <p><i class="fas fa-clock"></i> Seg - Sex: 9h às 21h | Sáb: 10h às 19h | Dom: Fechado</p>
+            <div class="social-links">
+                <a href="https://www.instagram.com/everson.syfy_7/" target="_blank" rel="noopener noreferrer">
+                  <i class="fab fa-instagram"></i>
+                </a>
+                <a href="https://github.com/Everson715" target="_blank" rel="noopener noreferrer">
+                  <i class="fab fa-github"></i>
+                </a>
+                <a href="https://www.linkedin.com/in/josé-everson" target="_blank" rel="noopener noreferrer">
+                  <i class="fab fa-linkedin"></i>
+                </a>
+            </div>
+        </div>
+        <div class="contact-form">
+            <form>
+                <input type="text" placeholder="Seu Nome de Aventureiro" required>
+                <input type="email" placeholder="Seu E-mail de Contato" required>
+                <textarea placeholder="Sua Mensagem ou Ideia de Missão" rows="5" required></textarea>
+                <button type="submit" class="btn-primary">Enviar Mensagem</button>
+            </form>
+        </div>
+      </div>
+      <div class="map-container">
+        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3954.912660144941!2d-35.75389658515096!3d-7.90045238054045!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x7ab6a1f10f8c8b1%3A0x8f7d9a1f2e1a3d9!2sSurubim%2C%20PE%2C%2055750-000!5e0!3m2!1spt-BR!2sbr!4v1678901234567!5m2!1spt-BR!2sbr" width="100%" height="300" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+      </div>
+    </div>
+  </section>
 
   <footer class="footer">
     <div class="footer-content">
@@ -132,29 +177,32 @@
         <p>Transformando cafés em aventuras.</p>
       </div>
 
-      <div class="footer-social">
-        <h4>Redes</h4>
-        <a href="https://www.instagram.com/everson.syfy_7/" target="_blank" rel="noopener noreferrer">
-          <i class="fab fa-instagram"></i> Instagram
-        </a>
-        <a href="https://github.com/Everson715" target="_blank" rel="noopener noreferrer">
-          <i class="fab fa-github"></i> GitHub
-        </a>
-      </div>
-    </div>
-
     <div class="footer-bottom">
-      <p>&copy; <span id="current-year"></span> The Bear. Todos os direitos reservados.</p>
+      <p>© <span id="current-year"></span> The Bear. Todos os direitos reservados.</p>
       <p>Power by <strong>Artorias</strong>.</p>
     </div>
   </footer>
 
   <script>
-    // Atualiza o ano do rodapé
     document.addEventListener('DOMContentLoaded', () => {
+      // Atualiza o ano do rodapé
       document.getElementById("current-year").textContent = new Date().getFullYear();
+
+      // Funcionalidade do menu de categorias para The Bear
+      const menuButtons = document.querySelectorAll('.menu-btn');
+      const menuContents = document.querySelectorAll('.menu-category-content');
+
+      menuButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          menuButtons.forEach(btn => btn.classList.remove('active'));
+          menuContents.forEach(content => content.classList.remove('active'));
+
+          button.classList.add('active');
+          const category = button.dataset.category;
+          document.querySelector(`.menu-category-content.${category}`).classList.add('active');
+        });
+      });
     });
   </script>
-  <script src="./scripts/logout.js"></script>
-</body>
+  </body>
 </html>

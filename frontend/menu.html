@@ -3,29 +3,174 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cardápio - The Bear</title>
+  <title>The Bear | Cardápio Completo</title>
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="menu-page.css" /> <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 </head>
+
 <body>
-  <nav>
-    <h1>The Bear</h1>
-    <ul>
-      <li><a href="index.html#home">🏠 Home</a></li>
-      <li><a href="index.html#about">📖 Sobre</a></li>
-      <li><a href="index.html#menu">📋 Menu</a></li>
-      <li><a href="index.html#contact">📞 Contato</a></li>
-    </ul>
-    <div class="navbar-buttons">
-      <button onclick="location.href='register.html'">Criar Conta</button>
-      <button onclick="location.href='login.html'">Login</button>
-      <button id="logoutBtn" style="display: none;">Sair</button>
+  <header>
+    <div class="container">
+        <div class="logo">
+            <h1>The Bear</h1>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="index.html#home">Home</a></li>
+                <li><a href="index.html#about">Sobre</a></li>
+                <li><a href="index.html#menu">Menu</a></li>
+                <li><a href="index.html#contact">Contato</a></li>
+                <li><a href="menu.html">Cardápio</a></li>
+            </ul>
+        </nav>
+        <div class="navbar-buttons">
+            <button class="btn-secondary" onclick="location.href='register.html'">Criar Conta</button>
+            <button class="btn-primary" onclick="location.href='login.html'">Login</button>
+            <button class="btn-primary" id="logoutBtn" style="display: none;">Sair</button>
+        </div>
     </div>
-  </nav>
-  <main>
+  </header>
+
+  <main class="container menu-full-page">
     <h2>Cardápio Completo</h2>
-    <p>Aqui você encontra todas as delícias da nossa cafeteria!</p>
-    <ul id="menuList"></ul>
+    <p class="menu-intro-text">Explore todas as nossas bebidas, pratos e sobremesas que energizarão sua jornada!</p>
+    
+    <div class="menu-category-filter">
+        <button class="menu-filter-btn active" data-category="all">Todos</button>
+        <button class="menu-filter-btn" data-category="bebidas-cafe">Bebidas com Café</button>
+        <button class="menu-filter-btn" data-category="chas">Chás</button>
+        <button class="menu-filter-btn" data-category="salgados">Pratos Salgados</button>
+        <button class="menu-filter-btn" data-category="sobremesas">Sobremesas</button>
+    </div>
+
+    <div id="menuListContainer">
+      <ul id="menuList">
+        </ul>
+      <p id="noItemsMessage" class="no-items-message" style="display: none;">Nenhum item encontrado nesta categoria.</p>
+    </div>
   </main>
+
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-brand">
+        <h3>The Bear</h3>
+        <p>Transformando cafés em aventuras.</p>
+      </div>
+
+      <div class="footer-social">
+        <h4>Redes Sociais</h4>
+        <a href="https://www.instagram.com/everson.syfy_7/" target="_blank" rel="noopener noreferrer">
+          <i class="fab fa-instagram"></i> Instagram
+        </a>
+        <a href="https://github.com/Everson715" target="_blank" rel="noopener noreferrer">
+          <i class="fab fa-github"></i> GitHub
+        </a>
+        <a href="https://www.linkedin.com/in/josé-everson" target="_blank" rel="noopener noreferrer">
+            <i class="fab fa-linkedin"></i> LinkedIn
+        </a>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>© <span id="current-year"></span> The Bear. Todos os direitos reservados.</p>
+      <p>Power by <strong>Artorias</strong>.</p>
+    </div>
+  </footer>
+
   <script src="./scripts/logout.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Atualiza o ano do rodapé
+      document.getElementById("current-year").textContent = new Date().getFullYear();
+
+      const userId = localStorage.getItem("userId");
+      const isAdmin = localStorage.getItem("isAdmin") === "true";
+
+      const logoutBtn = document.getElementById("logoutBtn");
+      if (userId) {
+          logoutBtn.style.display = "block"; // Mostra o botão "Sair" se o usuário estiver logado
+      } else {
+          logoutBtn.style.display = "none"; // Esconde o botão "Sair" se não estiver logado
+      }
+
+      // Se você tiver um script logout.js, pode remover esta parte
+      // document.getElementById("logoutBtn").addEventListener("click", () => {
+      //     localStorage.clear();
+      //     window.location.href = "index.html";
+      // });
+
+      const menuList = document.getElementById("menuList");
+      const noItemsMessage = document.getElementById("noItemsMessage");
+      const filterButtons = document.querySelectorAll('.menu-filter-btn');
+
+      let allMenuItems = []; // Para armazenar todos os itens do menu carregados
+
+      async function fetchMenu() {
+        try {
+          const response = await fetch('http://localhost:3000/menu');
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          allMenuItems = await response.json();
+          displayMenu(allMenuItems); // Exibe todos os itens por padrão
+        } catch (error) {
+          console.error('Erro ao buscar o menu:', error);
+          menuList.innerHTML = '<li class="error-message">Não foi possível carregar o cardápio. Tente novamente mais tarde.</li>';
+          noItemsMessage.style.display = 'none'; // Esconde a mensagem de "nenhum item" em caso de erro de carregamento
+        }
+      }
+
+      function displayMenu(itemsToDisplay) {
+        menuList.innerHTML = ''; // Limpa a lista atual
+
+        if (itemsToDisplay.length === 0) {
+          noItemsMessage.style.display = 'block';
+          return;
+        } else {
+          noItemsMessage.style.display = 'none';
+        }
+
+        itemsToDisplay.forEach(item => {
+          const li = document.createElement('li');
+          li.className = 'menu-item-card'; // Classe para estilização de cada item
+          li.setAttribute('data-category', item.category); // Adiciona atributo de categoria para filtragem
+          li.innerHTML = `
+            <img src="${item.image || 'https://via.placeholder.com/150x100?text=Sem+Imagem'}" alt="${item.name}">
+            <div class="item-info">
+              <h4>${item.name}</h4>
+              <p>${item.description || 'Deliciosa opção do nosso cardápio.'}</p>
+              <span class="price">R$ ${item.price ? item.price.toFixed(2).replace('.', ',') : '?.??'}</span>
+            </div>
+            `;
+          menuList.appendChild(li);
+        });
+      }
+
+      // Lógica de filtragem
+      filterButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          // Remove 'active' de todos e adiciona ao clicado
+          filterButtons.forEach(btn => btn.classList.remove('active'));
+          button.classList.add('active');
+
+          const category = button.dataset.category;
+          let filteredItems = [];
+
+          if (category === 'all') {
+            filteredItems = allMenuItems;
+          } else {
+            filteredItems = allMenuItems.filter(item => item.category === category);
+          }
+          displayMenu(filteredItems);
+        });
+      });
+
+      // Carregar o menu ao iniciar a página
+      fetchMenu();
+    });
+  </script>
 </body>
 </html>

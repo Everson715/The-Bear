@@ -25,39 +25,36 @@ export class UserService {
     });
   }
 
-  async login(email: string, password: string) {
-    const user = await prisma.user.findUnique({
-      where: { email },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        password: true,
-        xp: true,
-        coffeeBeans: true,
-        level: true,
-        isAdmin: true
-      }
-    });
-
-    if (!user) {
-      throw new Error("Email ou senha inválidos");
+async login(email: string, password: string) {
+  const user = await prisma.user.findUnique({
+    where: { email },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      password: true,
+      xp: true,
+      coffeeBeans: true,
+      level: true,
+      isAdmin: true
     }
+  });
 
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      throw new Error("Email ou senha inválidos");
-    }
+  if (!user) throw new Error("Email ou senha inválidos");
 
-    const token = jwt.sign({ userId: user.id }, jwtSecret, { expiresIn: "1d" });
+  const isMatch = await bcrypt.compare(password, user.password);
+  if (!isMatch) throw new Error("Email ou senha inválidos");
 
-    const { password: _, ...userWithoutPassword } = user;
+  const token = jwt.sign({ userId: user.id }, jwtSecret, { expiresIn: "1d" });
 
-    return {
-      user: userWithoutPassword,
-      token
-    };
-  }
+  const { password: _, ...userWithoutPassword } = user;
+
+  return {
+    user: userWithoutPassword,
+    token
+  };
+}
+
 
   async findById(id: string) {
     return await prisma.user.findUnique({

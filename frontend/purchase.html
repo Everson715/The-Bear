@@ -3,29 +3,291 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Compras - The Bear</title>
+  <title>The Bear | Compras</title>
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="purchase-page.css" /> <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 </head>
+
 <body>
-  <nav>
-    <h1>The Bear</h1>
-    <ul>
-      <li><a href="index.html#home">🏠 Home</a></li>
-      <li><a href="index.html#about">📖 Sobre</a></li>
-      <li><a href="index.html#menu">📋 Menu</a></li>
-      <li><a href="index.html#contact">📞 Contato</a></li>
-    </ul>
-    <div class="navbar-buttons">
-      <button onclick="location.href='register.html'">Criar Conta</button>
-      <button onclick="location.href='login.html'">Login</button>
-      <button id="logoutBtn" style="display: none;">Sair</button>
+  <header>
+    <div class="container">
+        <div class="logo">
+            <h1>The Bear</h1>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="index.html#home">Home</a></li>
+                <li><a href="index.html#about">Sobre</a></li>
+                <li><a href="index.html#menu">Menu</a></li>
+                <li><a href="index.html#contact">Contato</a></li>
+                <li><a href="purchase.html">Compras</a></li> </ul>
+        </nav>
+        <div class="navbar-buttons">
+            <button class="btn-secondary" onclick="location.href='register.html'">Criar Conta</button>
+            <button class="btn-primary" onclick="location.href='login.html'">Login</button>
+            <button class="btn-primary" id="logoutBtn" style="display: none;">Sair</button>
+        </div>
     </div>
-  </nav>
-  <main>
+  </header>
+
+  <main class="container purchase-page">
     <h2>Realizar Compra</h2>
-    <div id="menuItemsContainer"></div>
+    <p class="purchase-intro-text">Selecione os itens que deseja adicionar ao seu carrinho e finalize sua jornada de compra.</p>
+
+    <div class="purchase-content">
+      <div id="menuItemsContainer" class="menu-items-grid">
+        <p id="loadingMessage" class="loading-message">Carregando itens do menu...</p>
+        <p id="errorMessage" class="error-message" style="display: none;">Não foi possível carregar o menu. Tente novamente mais tarde.</p>
+      </div>
+
+      <div class="cart-summary">
+        <h3>Seu Carrinho <i class="fas fa-shopping-cart"></i></h3>
+        <ul id="cartList">
+          <li class="empty-cart-message">Seu carrinho está vazio. Adicione alguns itens!</li>
+        </ul>
+        <div class="cart-total">
+          <span>Total:</span>
+          <span id="cartTotal">R$ 0,00</span>
+        </div>
+        <button id="checkoutBtn" class="btn-primary" disabled>Finalizar Compra</button>
+      </div>
+    </div>
   </main>
+
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-brand">
+        <h3>The Bear</h3>
+        <p>Transformando cafés em aventuras.</p>
+      </div>
+
+      <div class="footer-social">
+        <h4>Redes Sociais</h4>
+        <a href="https://www.instagram.com/everson.syfy_7/" target="_blank" rel="noopener noreferrer">
+          <i class="fab fa-instagram"></i> Instagram
+        </a>
+        <a href="https://github.com/Everson715" target="_blank" rel="noopener noreferrer">
+          <i class="fab fa-github"></i> GitHub
+        </a>
+        <a href="https://www.linkedin.com/in/josé-everson" target="_blank" rel="noopener noreferrer">
+            <i class="fab fa-linkedin"></i> LinkedIn
+        </a>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>© <span id="current-year"></span> The Bear. Todos os direitos reservados.</p>
+      <p>Power by <strong>Artorias</strong>.</p>
+    </div>
+  </footer>
+
   <script src="./scripts/logout.js"></script>
-  <script src="./scripts/purchase.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Atualiza o ano do rodapé
+      document.getElementById("current-year").textContent = new Date().getFullYear();
+
+      const userId = localStorage.getItem("userId");
+      // Você pode querer verificar se o usuário está logado para permitir compras
+      if (!userId) {
+          // alert("Você precisa estar logado para realizar compras.");
+          // window.location.href = "login.html"; // Redireciona para login
+          // return;
+      }
+
+      // Lógica de exibir/esconder o botão de Sair
+      const logoutBtn = document.getElementById("logoutBtn");
+      if (userId) {
+          logoutBtn.style.display = "block";
+      } else {
+          logoutBtn.style.display = "none";
+      }
+
+      // --- Lógica da página de compras (purchase.js - Adaptado aqui para exemplo) ---
+      const menuItemsContainer = document.getElementById('menuItemsContainer');
+      const cartList = document.getElementById('cartList');
+      const cartTotalSpan = document.getElementById('cartTotal');
+      const checkoutBtn = document.getElementById('checkoutBtn');
+      const loadingMessage = document.getElementById('loadingMessage');
+      const errorMessage = document.getElementById('errorMessage');
+
+      let cart = [];
+      let menuItems = []; // Armazenará todos os itens do menu
+
+      // Função para carregar itens do menu
+      async function loadMenuItems() {
+        loadingMessage.style.display = 'block';
+        errorMessage.style.display = 'none';
+        menuItemsContainer.innerHTML = ''; // Limpa o container antes de carregar
+
+        try {
+          const response = await fetch('http://localhost:3000/menu');
+          if (!response.ok) {
+            throw new Error(`Erro ao carregar o menu: ${response.status}`);
+          }
+          menuItems = await response.json();
+          displayMenuItems();
+        } catch (error) {
+          console.error('Erro:', error);
+          errorMessage.textContent = 'Não foi possível carregar o menu. Tente novamente mais tarde.';
+          errorMessage.style.display = 'block';
+        } finally {
+          loadingMessage.style.display = 'none';
+        }
+      }
+
+      // Função para exibir os itens do menu
+      function displayMenuItems() {
+        if (menuItems.length === 0) {
+            menuItemsContainer.innerHTML = '<p class="no-items-message">Nenhum item disponível no momento.</p>';
+            return;
+        }
+
+        menuItems.forEach(item => {
+          const itemDiv = document.createElement('div');
+          itemDiv.className = 'purchase-menu-item-card';
+          itemDiv.innerHTML = `
+            <img src="${item.image || 'https://via.placeholder.com/150x100?text=Item'}" alt="${item.name}">
+            <div class="item-info">
+              <h4>${item.name}</h4>
+              <p>${item.description || 'Deliciosa opção.'}</p>
+              <span class="price">R$ ${item.price ? item.price.toFixed(2).replace('.', ',') : '?.??'}</span>
+            </div>
+            <button class="btn-primary add-to-cart-btn" data-id="${item.id}" data-name="${item.name}" data-price="${item.price}">Adicionar ao Carrinho</button>
+          `;
+          menuItemsContainer.appendChild(itemDiv);
+        });
+
+        // Adiciona listeners para os botões "Adicionar ao Carrinho"
+        document.querySelectorAll('.add-to-cart-btn').forEach(button => {
+          button.addEventListener('click', addToCart);
+        });
+      }
+
+      // Função para adicionar item ao carrinho
+      function addToCart(event) {
+        const id = parseInt(event.target.dataset.id);
+        const name = event.target.dataset.name;
+        const price = parseFloat(event.target.dataset.price);
+
+        const existingItem = cart.find(item => item.id === id);
+
+        if (existingItem) {
+          existingItem.quantity++;
+        } else {
+          cart.push({ id, name, price, quantity: 1 });
+        }
+        updateCartDisplay();
+      }
+
+      // Função para remover item do carrinho
+      function removeFromCart(id) {
+        const itemIndex = cart.findIndex(item => item.id === id);
+
+        if (itemIndex > -1) {
+          if (cart[itemIndex].quantity > 1) {
+            cart[itemIndex].quantity--;
+          } else {
+            cart.splice(itemIndex, 1);
+          }
+        }
+        updateCartDisplay();
+      }
+
+      // Função para atualizar a exibição do carrinho
+      function updateCartDisplay() {
+        cartList.innerHTML = '';
+        let total = 0;
+
+        if (cart.length === 0) {
+          cartList.innerHTML = '<li class="empty-cart-message">Seu carrinho está vazio. Adicione alguns itens!</li>';
+          checkoutBtn.disabled = true;
+          total = 0;
+        } else {
+          cart.forEach(item => {
+            const li = document.createElement('li');
+            li.className = 'cart-item';
+            li.innerHTML = `
+              <span>${item.name} (x${item.quantity})</span>
+              <span>R$ ${(item.price * item.quantity).toFixed(2).replace('.', ',')}
+                <button class="remove-from-cart-btn" data-id="${item.id}"><i class="fas fa-minus-circle"></i></button>
+              </span>
+            `;
+            cartList.appendChild(li);
+            total += item.price * item.quantity;
+          });
+          checkoutBtn.disabled = false;
+        }
+        cartTotalSpan.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+
+        // Adiciona listeners para os botões "Remover do Carrinho"
+        document.querySelectorAll('.remove-from-cart-btn').forEach(button => {
+          button.addEventListener('click', (e) => {
+            const idToRemove = parseInt(e.currentTarget.dataset.id);
+            removeFromCart(idToRemove);
+          });
+        });
+      }
+
+      // Função para finalizar a compra
+      async function checkout() {
+        if (cart.length === 0) {
+          alert("Seu carrinho está vazio!");
+          return;
+        }
+
+        const confirmPurchase = confirm(`Deseja finalizar a compra no valor total de ${cartTotalSpan.textContent}?`);
+        if (!confirmPurchase) return;
+
+        const purchaseData = {
+          userId: localStorage.getItem("userId"), // Certifique-se de que o userId está no localStorage
+          items: cart.map(item => ({
+            itemId: item.id,
+            quantity: item.quantity,
+            priceAtPurchase: item.price // Armazena o preço no momento da compra
+          })),
+          totalAmount: parseFloat(cartTotalSpan.textContent.replace('R$', '').replace(',', '.')),
+          purchaseDate: new Date().toISOString()
+        };
+
+        try {
+          const token = localStorage.getItem("token"); // Obtenha o token do localStorage
+          const res = await fetch('http://localhost:3000/api/purchases', { // Altere a URL para sua API de compras
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}` // Inclua o token no cabeçalho de autorização
+            },
+            body: JSON.stringify(purchaseData)
+          });
+
+          const response = await res.json();
+
+          if (!res.ok) {
+            throw new Error(response.error || 'Erro ao finalizar a compra.');
+          }
+
+          alert('Compra realizada com sucesso! Você ganhou XP e grãos!');
+          cart = []; // Limpa o carrinho
+          updateCartDisplay();
+          // Opcional: Redirecionar o usuário ou mostrar uma mensagem de sucesso mais detalhada
+          // window.location.href = 'missions.html'; // Exemplo
+        } catch (error) {
+          console.error('Erro na finalização da compra:', error);
+          alert(`Erro ao finalizar a compra: ${error.message || 'Verifique sua conexão ou tente novamente.'}`);
+        }
+      }
+
+      checkoutBtn.addEventListener('click', checkout);
+
+      // Carrega os itens do menu ao carregar a página
+      loadMenuItems();
+      // Atualiza a exibição do carrinho (vazio no início)
+      updateCartDisplay();
+    });
+  </script>
 </body>
 </html>

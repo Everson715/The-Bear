@@ -1,15 +1,15 @@
-import express from 'express';
-import MenuItemController from '../controllers/MenuItemController';
-import { isAdmin } from '../middlewares/isAdmin';
+import express from "express";
+import { menuController } from "../controllers/menuController";
+import { isAdmin } from "../middlewares/isAdmin";
 
 const router = express.Router();
 
-// Public - ver o cardápio
-router.get('/', MenuItemController.getAll);
+// Público - visualizar menu
+router.get("/", menuController.getAll);
 
 // Privado - apenas admin
-router.post('/', isAdmin, MenuItemController.create);
-router.put('/:id', isAdmin, MenuItemController.update);
-router.delete('/:id', isAdmin, MenuItemController.delete);
+router.post("/", isAdmin, menuController.create);
+router.put("/:id", isAdmin, menuController.update);
+router.delete("/:id", isAdmin, menuController.remove);
 
 export default router;

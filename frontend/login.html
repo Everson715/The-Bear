@@ -2,84 +2,131 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <title>Login - The Bear Journey</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>The Bear | Login</title>
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="login-register.css" /> <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 </head>
-<body>
-  <nav>
-    <h1>The Bear Journey</h1>
-    <ul>
-      <li><a href="index.html">🏠 Início</a></li>
-    </ul>
-  </nav>
 
-  <main>
-    <section>
+<body>
+  <header>
+    <div class="container">
+        <div class="logo">
+            <h1>The Bear</h1>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                </ul>
+        </nav>
+        <div class="navbar-buttons">
+            </div>
+    </div>
+  </header>
+
+  <main class="auth-page">
+    <section class="auth-form-container">
       <h2>Entrar na sua conta</h2>
       <form id="loginForm">
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" required />
+        <div class="form-group">
+          <label for="email">Email:</label>
+          <input type="email" id="email" name="email" placeholder="seuemail@exemplo.com" required />
+        </div>
 
-        <label for="password">Senha:</label>
-        <input type="password" id="password" name="password" required />
+        <div class="form-group">
+          <label for="password">Senha:</label>
+          <input type="password" id="password" name="password" placeholder="********" required />
+        </div>
 
-        <button type="submit">Entrar</button>
+        <button type="submit" class="btn-primary">Entrar</button>
       </form>
-      <p>Não tem uma conta? <a href="register.html">Cadastre-se</a></p>
+      <p class="auth-link">Não tem uma conta? <a href="register.html">Cadastre-se</a></p>
     </section>
   </main>
 
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-brand">
+        <h3>The Bear</h3>
+        <p>Transformando cafés em aventuras.</p>
+      </div>
+
+      <div class="footer-social">
+        <h4>Redes Sociais</h4>
+        <a href="https://www.instagram.com/everson.syfy_7/" target="_blank" rel="noopener noreferrer">
+          <i class="fab fa-instagram"></i> Instagram
+        </a>
+        <a href="https://github.com/Everson715" target="_blank" rel="noopener noreferrer">
+          <i class="fab fa-github"></i> GitHub
+        </a>
+        <a href="https://www.linkedin.com/in/josé-everson" target="_blank" rel="noopener noreferrer">
+            <i class="fab fa-linkedin"></i> LinkedIn
+        </a>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>© <span id="current-year"></span> The Bear. Todos os direitos reservados.</p>
+      <p>Power by <strong>Artorias</strong>.</p>
+    </div>
+  </footer>
+
   <script>
-  document.getElementById("login-form").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const form = e.target;
-
-  const data = {
-    email: form.email.value,
-    password: form.password.value,
-  };
-
-  try {
-    const res = await fetch("http://localhost:3000/users/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
+    document.addEventListener('DOMContentLoaded', () => {
+      // Atualiza o ano do rodapé
+      document.getElementById("current-year").textContent = new Date().getFullYear();
     });
 
-    const response = await res.json();
+    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const form = e.target;
 
-    if (!res.ok) {
-      // Exibe o erro do backend
-      alert(response.error || "Erro no login");
-      return;
-    }
+      const data = {
+        email: form.email.value,
+        password: form.password.value,
+      };
 
-    // Aqui garantimos que "user" está presente
-    const user = response.user;
-    if (!user) {
-      alert("Resposta inválida do servidor.");
-      return;
-    }
+      try {
+        const res = await fetch("http://localhost:3000/api/users/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        });
 
-    // Armazenar dados no localStorage
-    localStorage.setItem("userId", user.id);
-    localStorage.setItem("isAdmin", user.isAdmin? "true" : "false"); // Aqui é onde o dashboard verifica
-    localStorage.setItem("token", response.token);
+        const response = await res.json();
 
-    // Redirecionar
-    if (user.isAdmin) {
-      window.location.href = "admin-dashboard.html";
-    } else {
-      window.location.href = "index.html";
-    }
+        if (!res.ok) {
+          // Melhorar o tratamento de erro, mostrando a mensagem do servidor se disponível
+          alert(response.error || "Erro no login. Verifique suas credenciais.");
+          return;
+        }
 
-  } catch (err) {
-    console.error("Erro ao fazer login:", err);
-    alert("Erro de conexão com o servidor.");
-  }
-  });
+        const user = response.user;
+        if (!user) {
+          alert("Resposta inválida do servidor. Tente novamente.");
+          return;
+        }
+
+        localStorage.setItem("userId", user.id);
+        localStorage.setItem("isAdmin", user.isAdmin ? "true" : "false");
+        localStorage.setItem("token", response.token);
+
+        if (user.isAdmin) {
+          window.location.href = "admin-dashboard.html";
+        } else {
+          window.location.href = "index.html";
+        }
+
+      } catch (err) {
+        console.error("Erro ao fazer login:", err);
+        alert("Erro de conexão com o servidor. Por favor, tente novamente mais tarde.");
+      }
+    });
   </script>
 </body>
 </html>
