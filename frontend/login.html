@@ -89,7 +89,6 @@
       };
 
       try {
-        // AQUI ESTÁ A URL CORRIGIDA PARA O LOGIN
         const res = await fetch("http://localhost:3000/auth/login", {
           method: "POST",
           headers: {
@@ -98,17 +97,14 @@
           body: JSON.stringify(data),
         });
 
-        // LÓGICA DE TRATAMENTO DE ERRO APRIMORADA PARA EVITAR "Body has already been consumed"
         if (!res.ok) {
           let errorMessage = "Erro desconhecido. Por favor, tente novamente.";
           const contentType = res.headers.get("content-type");
 
           if (contentType && contentType.includes("application/json")) {
-            // Se a resposta for JSON, tenta parsear para pegar a mensagem de erro
             const errorBody = await res.json();
             errorMessage = errorBody.message || errorBody.error || `Erro: ${res.status} ${res.statusText}`;
           } else {
-            // Se a resposta NÃO for JSON (como um 404 HTML padrão), pega o status e o texto bruto
             const errorText = await res.text();
             console.error("Login: Resposta do servidor não JSON:", errorText);
             errorMessage = `Erro do servidor: ${res.status} ${res.statusText || 'Não Encontrado'}. Detalhes: ${errorText.substring(0, Math.min(errorText.length, 100))}...`;
@@ -117,7 +113,6 @@
           return;
         }
 
-        // Continua APENAS se a resposta for OK (res.ok é true)
         const response = await res.json();
 
         const user = response.user;
@@ -133,7 +128,7 @@
         if (user.isAdmin) {
           window.location.href = "admin-dashboard.html";
         } else {
-          window.location.href = "index.html";
+          window.location.href = "dashboard.html"; // CORRIGIDO AQUI!
         }
 
       } catch (err) {

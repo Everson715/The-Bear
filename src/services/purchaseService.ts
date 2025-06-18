@@ -60,7 +60,7 @@ export const purchaseService = {
   },
 
   async getAll() {
-    // CORREÇÃO AQUI: Agora inclui 'items' e dentro de 'items', inclui 'menuItem'
+    // CORREÇÃO: Agora inclui 'items' e dentro de 'items', inclui 'menuItem'
     return prisma.purchase.findMany({
       include: {
         user: true, // Opcional: incluir informações do usuário que fez a compra
