@@ -1,92 +1,91 @@
+// src/services/MissionService.ts
 import { prisma } from "../utils/prisma";
-import NotificationService from "./NotificationService";
 
-// Transforma string CSV ou JSON em array
-function parseRequiredCategories(raw: string | null | undefined): string[] {
-  if (!raw) return [];
-  try {
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return raw.split(",").map(c => c.trim());
-  }
+interface MissionCreateData {
+  title: string;
+  description?: string;
+  category: string; // Ex: "Daily", "Weekly", "Special"
+  requiredCategories?: string; // Ex: "Bebidas com café,Chás"
 }
 
-export const missionService = {
-  async create(data: { title: string; description?: string; requiredCategories?: string }) {
-    return await prisma.mission.create({ data });
-  },
+interface MissionUpdateData {
+  title?: string;
+  description?: string;
+  category?: string;
+  requiredCategories?: string;
+}
 
-  async getAll() {
+export class MissionService {
+  async getAllMissions() {
     return await prisma.mission.findMany();
-  },
+  }
 
-  async complete(userId: string, missionId: number) {
-    const userMission = await prisma.userMission.upsert({
-      where: {
-        userId_missionId: {
-          userId,
-          missionId
-        }
-      },
-      update: { completed: true },
-      create: { userId, missionId, completed: true }
+  async getMissionById(id: number) {
+    return await prisma.mission.findUnique({
+      where: { id },
     });
+  }
 
-    await NotificationService.notifyUser(userId, `Missão concluída: ID ${missionId}`);
-    return userMission;
-  },
+  async createMission(data: MissionCreateData) {
+    return await prisma.mission.create({ data });
+  }
 
-  async checkAndGetMissions(userId: string) {
-    const userPurchases = await prisma.purchase.findMany({
-      where: { userId },
-      include: { menuItem: true }
+  async updateMission(id: number, data: MissionUpdateData) {
+    return await prisma.mission.update({
+      where: { id },
+      data,
     });
+  }
 
-    const userItemsCategories = userPurchases
-      .map(p => p.menuItem?.category)
-      .filter((cat): cat is string => !!cat);
+  async deleteMission(id: number) {
+    // Ao deletar uma missão, também deletamos suas associações em UserMission
+    await prisma.userMission.deleteMany({
+      where: { missionId: id }
+    });
+    return await prisma.mission.delete({
+      where: { id },
+    });
+  }
 
-    const userMissions = await prisma.userMission.findMany({ where: { userId } });
-    const allMissions = await prisma.mission.findMany();
-
-    for (const mission of allMissions) {
-      const userMissionEntry = userMissions.find(um => um.missionId === mission.id);
-      if (userMissionEntry?.completed) continue;
-
-      const requiredCats = parseRequiredCategories(mission.requiredCategories);
-      if (requiredCats.length === 0) continue;
-
-      const hasAllCategories = requiredCats.every(cat => userItemsCategories.includes(cat));
-
-      if (hasAllCategories) {
-        await prisma.userMission.upsert({
-          where: {
-            userId_missionId: {
-              userId,
-              missionId: mission.id
-            }
-          },
-          update: { completed: true },
-          create: { userId, missionId: mission.id, completed: true }
-        });
-
-        await NotificationService.notifyUser(
-          userId,
-          `Parabéns! Você concluiu a missão: ${mission.title}`
-        );
-      }
+  // Métodos para o usuário completar missões (se ainda não tiver em UserMissionService)
+  async completeUserMission(userId: string, missionId: number) {
+    // Primeiro, verifica se a missão existe
+    const mission = await prisma.mission.findUnique({ where: { id: missionId } });
+    if (!mission) {
+      throw new Error("Missão não encontrada.");
     }
 
-    const finalUserMissions = await prisma.userMission.findMany({
-      where: { userId },
-      include: { mission: true }
+    // Marca a missão como completa para o usuário
+    const userMission = await prisma.userMission.update({
+      where: {
+        userId_missionId: {
+          userId: userId,
+          missionId: missionId,
+        },
+      },
+      data: {
+        completed: true,
+      },
     });
+    
+    /*
+    if (mission.xpReward) {
+      await prisma.user.update({
+        where: { id: userId },
+        data: { xp: { increment: mission.xpReward } }
+      });
+    }
+    */
 
-    return finalUserMissions.map(um => ({
-      id: um.missionId,
-      title: um.mission.title,
-      completed: um.completed
-    }));
+    return userMission;
   }
-};
+
+  async getUserMissions(userId: string) {
+    return await prisma.userMission.findMany({
+      where: { userId },
+      include: {
+        mission: true, // Inclui os detalhes da missão
+      },
+    });
+  }
+}

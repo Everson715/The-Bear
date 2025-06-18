@@ -1,14 +1,16 @@
 // src/routes/missionRoutes.ts
 import { Router } from "express";
-import { missionController } from "../controllers/missionController"; // Verifique se o caminho está correto
+import { MissionController } from "../controllers/missionController"; // Importe o controller
+import { authMiddleware } from "../middlewares/authMiddleware";
+import { isAdmin } from "../middlewares/isAdmin";
 
 const router = Router();
 
-// Rotas de Missão (serão acessíveis via /api/)
-// Ex: POST /api/missions, GET /api/missions, GET /api/users/:userId/missions
-router.post("/missions", missionController.create);
-router.get("/missions", missionController.getAll);
-router.get("/users/:userId/missions", missionController.getUserMissions);
-router.put("/users/:userId/missions/:id/complete", missionController.complete);
+// Rotas de ADMIN (CRUD para Missões)
+router.post("/", authMiddleware, isAdmin, MissionController.createMission); // POST /api/missions
+router.get("/", authMiddleware, isAdmin, MissionController.getAllMissions); // GET /api/missions (todas as missões para admin)
+router.get("/:id", authMiddleware, isAdmin, MissionController.getMissionById); // GET /api/missions/:id
+router.put("/:id", authMiddleware, isAdmin, MissionController.updateMission); // PUT /api/missions/:id
+router.delete("/:id", authMiddleware, isAdmin, MissionController.deleteMission); // DELETE /api/missions/:id
 
 export default router;

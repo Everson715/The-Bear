@@ -1,187 +1,570 @@
+/* Variáveis de Cores e Fontes */
+:root {
+    /* Tons de Marrom para a identidade "The Bear" */
+    --primary-color: #6F4E37; /* Marrom escuro principal (café, urso) */
+    --secondary-color: #8B4513; /* Marrom médio, mais quente (terracota, carvalho) */
+    --accent-color: #C39F80;   /* Bege acinzentado / Marrom claro (para detalhes ou fundo) */
+    --text-color-dark: #333;
+    --text-color-light: #f8f8f8;
+    --bg-light: #FBF7F2;      /* Fundo muito claro, quase branco (papel) */
+    --bg-dark: #3C2F2F;       /* Marrom muito escuro, quase preto (para footer, etc.) */
+    --border-color: #D3CDC6;  /* Borda suave e neutra */
+    --error-color: #E74C3C;   /* Vermelho para erros */
+    --success-color: #2ECC71; /* Verde para sucesso */
+
+    --font-heading: 'Playfair Display', serif;
+    --font-body: 'Montserrat', sans-serif;
+}
+
+/* Estilos gerais do cabeçalho para a navegação */
+header {
+    background-color: var(--primary-color); /* Fundo do cabeçalho */
+    color: var(--text-color-light);
+    padding: 15px 0;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* NOVO: Estilo para o container de conteúdo do header */
+header .header-content {
+    display: flex;
+    justify-content: space-between; /* Espalha os itens (logo, nav, buttons) */
+    align-items: center; /* Centraliza verticalmente */
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    flex-wrap: wrap; /* Permite que os itens quebrem a linha em telas pequenas */
+    gap: 20px; /* Adiciona um gap entre os itens do header */
+}
+
+.logo h1 {
+    font-family: var(--font-heading);
+    font-size: 2.5em;
+    color: var(--text-color-light);
+    margin: 0;
+    flex-shrink: 0; /* Previne que o logo encolha */
+}
+
+header nav {
+    flex-grow: 1; /* Permite que a nav cresça e ocupe o espaço central */
+    text-align: center; /* Centraliza os itens de nav */
+}
+
+header nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center; /* Centraliza os links de navegação dentro da nav */
+    gap: 25px; /* Espaço entre os itens da navegação */
+}
+
+header nav ul li a {
+    color: var(--text-color-light);
+    text-decoration: none;
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 1.05em;
+    padding: 8px 12px;
+    border-radius: 5px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    white-space: nowrap; /* Evita que o texto quebre em várias linhas */
+}
+
+header nav ul li a:hover {
+    background-color: rgba(255, 255, 255, 0.15); /* Fundo sutil no hover */
+}
+
+header nav ul li a.active {
+    background-color: var(--secondary-color); /* Fundo para o item ativo */
+    color: var(--text-color-light);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.navbar-buttons {
+    flex-shrink: 0; /* Previne que os botões encolham */
+    margin-left: auto; /* Empurra os botões para a direita, útil em flexbox */
+}
+
+.navbar-buttons .btn-primary {
+    background-color: var(--accent-color); /* Cor de destaque para o botão Sair */
+    color: var(--text-color-dark);
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: var(--font-body);
+    font-weight: 700;
+    transition: background-color 0.3s ease;
+}
+
+.navbar-buttons .btn-primary:hover {
+    background-color: #AD8A6A; /* Tom mais escuro do accent no hover */
+}
+
 /* Estilos específicos para o Dashboard Admin */
 
 .admin-dashboard {
     padding: 60px 20px;
     background-color: var(--bg-light);
     min-height: calc(100vh - 180px); /* Ajusta a altura mínima para o conteúdo, considerando header e footer */
+    font-family: var(--font-body); /* Aplica a fonte padrão */
+    color: var(--text-color-dark);
 }
 
 .admin-dashboard h2 {
-    font-size: 2.8em; /* Aumenta o tamanho do título principal */
+    font-family: var(--font-heading);
+    font-size: 3em; /* Aumenta o tamanho do título principal */
     color: var(--primary-color);
     margin-bottom: 50px;
     text-align: center;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+}
+
+.admin-feature-section { /* Nova classe para os containers de feature */
+    display: block; /* Por padrão, visível, mas JS vai controlar */
 }
 
 .admin-section {
     background-color: #fff;
     padding: 40px;
-    border-radius: 8px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-    margin-bottom: 40px; /* Espaço entre as seções */
+    border-radius: 10px; /* Bordas mais suaves */
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1); /* Sombra mais pronunciada */
+    margin-bottom: 40px;
+    border: 1px solid var(--border-color); /* Adiciona uma borda sutil */
 }
 
 .admin-section h3 {
-    font-size: 2em;
+    font-family: var(--font-heading);
+    font-size: 2.2em;
     color: var(--secondary-color);
     margin-bottom: 30px;
     text-align: center;
+    border-bottom: 2px solid var(--accent-color); /* Linha de destaque */
+    padding-bottom: 15px;
 }
 
-/* Estilo do formulário de adicionar item */
-#menu-form {
+/* Estilo do formulário de adicionar/editar item e missões */
+#menu-form,
+#mission-form {
     display: flex;
     flex-direction: column;
-    gap: 15px; /* Espaço entre os campos do formulário */
-    max-width: 600px; /* Limita a largura do formulário */
-    margin: 0 auto; /* Centraliza o formulário */
+    gap: 20px; /* Mais espaço entre os campos */
+    max-width: 650px; /* Um pouco mais largo */
+    margin: 0 auto;
+    padding: 25px; /* Adiciona padding interno ao formulário */
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background-color: #fcfcfc; /* Fundo ligeiramente diferente para o formulário */
 }
 
+/* Estilo para inputs e textareas gerais do formulário */
 #menu-form input,
-#menu-form textarea {
-    padding: 12px;
+#menu-form textarea,
+#menu-form select,
+#mission-form input,
+#mission-form textarea,
+#mission-form select {
+    padding: 14px; /* Aumenta o padding */
     border: 1px solid var(--border-color);
-    border-radius: 5px;
-    font-family: 'Montserrat', sans-serif;
-    font-size: 1em;
+    border-radius: 6px; /* Bordas mais arredondadas */
+    font-family: var(--font-body);
+    font-size: 1.05em;
     width: 100%;
+    box-sizing: border-box; /* Garante que padding e borda não aumentem a largura total */
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-#menu-form textarea {
+#menu-form input:focus,
+#menu-form textarea:focus,
+#menu-form select:focus,
+#mission-form input:focus,
+#mission-form textarea:focus,
+#mission-form select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(111, 78, 55, 0.2); /* Sombra ao focar usando primary-color */
+    outline: none; /* Remove o outline padrão do navegador */
+}
+
+#menu-form textarea,
+#mission-form textarea {
     resize: vertical;
-    min-height: 80px;
+    min-height: 100px; /* Aumenta a altura mínima */
 }
 
-#menu-form button {
-    align-self: flex-end; /* Alinha o botão à direita */
-    width: auto; /* Ocupa apenas o espaço necessário */
-}
-
-/* Estilo da lista de itens do menu */
-#menu-list-container {
-    max-height: 500px; /* Altura máxima para a lista com scroll */
-    overflow-y: auto; /* Adiciona scroll se houver muitos itens */
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    padding: 15px;
-    background-color: var(--bg-light); /* Fundo para a área da lista */
-}
-
-#menu-list {
+/* Estilo para os grupos de input (como a categoria) */
+.input-group {
     display: flex;
     flex-direction: column;
-    gap: 20px; /* Espaço entre os itens da lista */
+    gap: 8px; /* Espaço entre label e input/select */
 }
 
-.admin-menu-item {
-    background-color: #fff;
+.input-group label {
+    font-weight: bold;
+    color: var(--text-color-dark);
+    font-size: 0.95em;
+}
+
+/* Estilo dos botões */
+#menu-form .btn-primary,
+#menu-form .btn-secondary,
+#mission-form .btn-primary,
+#mission-form .btn-secondary {
+    align-self: flex-end;
+    width: auto;
+    padding: 12px 25px; /* Aumenta o padding dos botões */
+    font-size: 1em;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: var(--text-color-light);
+    border: none;
+}
+
+.btn-primary:hover {
+    background-color: #5A3E2C; /* Tom mais escuro de primary */
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    background-color: var(--border-color);
+    color: var(--text-color-dark);
+    border: 1px solid #ccc;
+    margin-left: 10px; /* Espaço entre botões (Criar/Atualizar e Cancelar) */
+}
+
+.btn-secondary:hover {
+    background-color: #C1B9B0; /* Tom mais escuro de border-color */
+    transform: translateY(-2px);
+}
+
+/* Estilo da lista de itens do menu e missões */
+#menu-list-container,
+#mission-list-container {
+    max-height: 550px; /* Altura máxima para as listas */
+    overflow-y: auto;
     border: 1px solid var(--border-color);
-    border-radius: 8px;
-    padding: 15px;
-    display: flex;
-    align-items: flex-start; /* Alinha itens ao topo */
-    gap: 15px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border-radius: 10px;
+    padding: 20px; /* Mais padding */
+    background-color: #fff; /* Fundo branco para a área da lista */
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.03); /* Sombra interna sutil */
 }
 
-.admin-menu-item:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+#menu-list,
+#mission-list {
+    display: flex;
+    flex-direction: column;
+    gap: 25px; /* Mais espaço entre os itens da lista */
+    list-style: none; /* Remove marcadores de lista */
+    padding: 0;
+    margin: 0;
+}
+
+/* Estilo para itens individuais do menu e missão */
+.admin-menu-item,
+.admin-mission-item {
+    background-color: #fefefe;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 20px; /* Mais espaço entre imagem/detalhes */
+    box-shadow: 0 3px 10px rgba(0,0,0,0.07);
+    transition: all 0.3s ease;
+}
+
+.admin-menu-item:hover,
+.admin-mission-item:hover {
+    transform: translateY(-5px); /* Efeito de elevação mais pronunciado */
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    border-color: var(--primary-color); /* Borda destaca no hover */
 }
 
 .admin-menu-item img {
-    width: 100px;
-    height: 100px;
+    width: 120px; /* Aumenta um pouco o tamanho da imagem */
+    height: 120px;
     object-fit: cover;
-    border-radius: 5px;
-    flex-shrink: 0; /* Impede que a imagem encolha */
+    border-radius: 8px; /* Bordas mais arredondadas para a imagem */
+    flex-shrink: 0;
+    border: 1px solid var(--border-color); /* Borda na imagem */
 }
 
-.admin-menu-item .item-details {
+.admin-menu-item .item-details,
+.admin-mission-item .mission-details {
     flex-grow: 1;
 }
 
-.admin-menu-item h4 {
-    font-size: 1.3em;
+.admin-menu-item h4,
+.admin-mission-item h4 {
+    font-family: var(--font-heading);
+    font-size: 1.5em; /* Aumenta o tamanho do título do item */
     color: var(--primary-color);
-    margin-bottom: 5px;
-    text-align: left; /* Alinha o título do item à esquerda */
+    margin-bottom: 8px;
+    text-align: left;
+    line-height: 1.2;
 }
 
-.admin-menu-item p {
-    font-size: 0.95em;
+.admin-menu-item p,
+.admin-mission-item p {
+    font-size: 1em; /* Tamanho da fonte mais legível */
     color: var(--text-color-dark);
-    margin-bottom: 5px;
+    margin-bottom: 4px; /* Menos espaço entre parágrafos */
 }
 
-.admin-menu-item p strong {
+.admin-menu-item p strong,
+.admin-mission-item p strong {
     color: var(--secondary-color);
 }
 
 .admin-menu-item span {
     font-weight: bold;
     color: var(--primary-color);
-    font-size: 1.05em;
+    font-size: 1.1em; /* Aumenta o tamanho da fonte para números */
 }
 
-.admin-menu-item .description {
+.admin-menu-item .description,
+.admin-mission-item .description {
     font-style: italic;
-    color: #555;
-    margin-top: 5px;
-    line-height: 1.4;
+    color: #666; /* Tom um pouco mais escuro para descrição */
+    margin-top: 10px; /* Mais espaço para a descrição */
+    line-height: 1.5; /* Melhor legibilidade */
+    max-height: 80px; /* Limita a altura da descrição */
+    overflow: hidden; /* Oculta o excesso */
+    text-overflow: ellipsis; /* Adiciona reticências */
 }
 
-.admin-menu-item .delete-btn {
-    margin-top: 10px;
-    align-self: flex-start; /* Alinha o botão de exclusão com o topo do item-details */
-    font-size: 0.9em;
-    padding: 8px 15px;
+/* Estilo para os botões de ação dentro dos itens da lista */
+.item-actions,
+.mission-actions {
+    margin-top: 15px; /* Espaço maior entre descrição e botões */
+    display: flex;
+    gap: 10px; /* Espaço entre os botões */
+    justify-content: flex-start; /* Alinha à esquerda */
 }
+
+.item-actions .btn-secondary,
+.mission-actions .btn-secondary {
+    font-size: 0.9em;
+    padding: 8px 18px;
+    border-radius: 4px;
+    margin-left: 0; /* Remove a margem extra */
+}
+
+.item-actions .btn-secondary.delete-btn,
+.mission-actions .btn-secondary.delete-btn {
+    background-color: var(--error-color); /* Cor para o botão de excluir */
+    color: #fff;
+    border: none;
+}
+
+.item-actions .btn-secondary.delete-btn:hover,
+.mission-actions .btn-secondary.delete-btn:hover {
+    background-color: #C0392B; /* Tom mais escuro do vermelho */
+}
+
+.item-actions .btn-secondary.edit-btn,
+.mission-actions .btn-secondary.edit-btn {
+    background-color: var(--accent-color); /* Cor para o botão de editar */
+    color: var(--text-color-dark);
+    border: none;
+}
+
+.item-actions .btn-secondary.edit-btn:hover,
+.mission-actions .btn-secondary.edit-btn:hover {
+    background-color: #AD8A6A; /* Tom mais escuro do accent */
+}
+
 
 /* Mensagens de estado */
 .no-items-message, .error-message {
     text-align: center;
     font-style: italic;
     color: #777;
-    padding: 20px;
+    padding: 30px;
+    background-color: #f0f0f0;
+    border-radius: 8px;
+    margin: 20px 0;
+}
+
+.error-message {
+    color: var(--error-color);
+    font-weight: bold;
+}
+
+/* Linha divisória */
+hr {
+    border: none;
+    border-top: 1px dashed var(--border-color); /* Linha tracejada suave */
+    margin: 60px auto; /* Mais espaço acima e abaixo */
+    width: 80%; /* Largura da linha */
 }
 
 /* Responsividade para o Dashboard Admin */
-@media (max-width: 768px) {
+@media (max-width: 992px) {
+    header .header-content { /* Ajusta o layout do header em telas médias */
+        flex-direction: column; /* Empilha logo, nav e buttons */
+        gap: 15px;
+    }
+
+    header nav {
+        width: 100%; /* Garante que a nav ocupe a largura total */
+    }
+
+    header nav ul {
+        gap: 15px;
+        flex-wrap: wrap; /* Permite quebrar a linha se muitos itens */
+        justify-content: center;
+    }
+
+    header nav ul li a {
+        font-size: 0.95em;
+        padding: 6px 10px;
+    }
+
+    .navbar-buttons {
+        margin-left: 0; /* Remove o auto margin quando empilha */
+        width: 100%; /* Botão ocupa a largura total */
+        text-align: center;
+    }
+
     .admin-dashboard h2 {
-        font-size: 2.2em;
+        font-size: 2.5em;
     }
 
     .admin-section {
-        padding: 25px;
+        padding: 30px;
+        margin-bottom: 30px;
     }
 
     .admin-section h3 {
-        font-size: 1.8em;
+        font-size: 2em;
+        margin-bottom: 25px;
     }
 
-    .admin-menu-item {
+    #menu-form,
+    #mission-form {
+        max-width: 100%;
+        padding: 20px;
+    }
+
+    .admin-menu-item,
+    .admin-mission-item {
         flex-direction: column;
         align-items: center;
         text-align: center;
+        padding: 15px;
     }
 
     .admin-menu-item img {
-        margin-bottom: 10px;
+        margin-bottom: 15px;
+        width: 100px;
+        height: 100px;
     }
 
-    .admin-menu-item .item-details {
+    .admin-menu-item .item-details,
+    .admin-mission-item .mission-details {
         text-align: center;
+        width: 100%; /* Ocupa largura total em mobile */
     }
 
-    .admin-menu-item .delete-btn {
-        align-self: center; /* Centraliza o botão em telas menores */
+    .item-actions,
+    .mission-actions {
+        justify-content: center; /* Centraliza os botões em telas menores */
+        flex-wrap: wrap; /* Permite que os botões quebrem a linha */
+        margin-top: 10px;
+    }
+
+    .admin-menu-item .description,
+    .admin-mission-item .description {
+        max-height: none; /* Remove limite de altura em telas menores para melhor visualização */
+        overflow: visible;
+        text-overflow: clip;
+    }
+}
+
+@media (max-width: 768px) {
+    header .header-content {
+        flex-direction: column; /* Em telas menores, os itens do header empilham */
+        gap: 15px;
+    }
+
+    header nav ul {
+        flex-direction: column; /* Links da nav empilham */
+    }
+
+    .admin-dashboard {
+        padding: 40px 15px;
+    }
+
+    .admin-dashboard h2 {
+        font-size: 2em;
+        margin-bottom: 40px;
+    }
+
+    .admin-section h3 {
+        font-size: 1.7em;
+        margin-bottom: 20px;
+    }
+
+    #menu-form input,
+    #menu-form textarea,
+    #menu-form select,
+    #mission-form input,
+    #mission-form textarea,
+    #mission-form select {
+        font-size: 0.95em;
+        padding: 10px;
+    }
+
+    .admin-menu-item h4,
+    .admin-mission-item h4 {
+        font-size: 1.3em;
+    }
+
+    .admin-menu-item p,
+    .admin-mission-item p {
+        font-size: 0.9em;
     }
 }
 
 @media (max-width: 480px) {
     .admin-dashboard {
-        padding: 30px 15px;
+        padding: 25px 10px;
+    }
+
+    .admin-dashboard h2 {
+        font-size: 1.8em;
+        margin-bottom: 30px;
+    }
+
+    .admin-section {
+        padding: 20px;
+        margin-bottom: 25px;
+    }
+
+    .admin-section h3 {
+        font-size: 1.5em;
+    }
+
+    #menu-form,
+    #mission-form {
+        padding: 15px;
+        gap: 15px;
+    }
+
+    .item-actions,
+    .mission-actions {
+        flex-direction: column; /* Botões empilham em telas muito pequenas */
+        gap: 8px;
+    }
+
+    .item-actions .btn-secondary,
+    .mission-actions .btn-secondary {
+        width: 100%; /* Botões ocupam largura total */
+        margin-left: 0;
     }
 }

@@ -40,8 +40,10 @@ model Mission {
   description        String?
   category           String
   requiredCategories String?
+  xpReward           Int?          @default(0) // Add this
+  coffeeBeansReward  Int?          @default(0) // Add this
 
-  userMissions UserMission[]
+  userMissions       UserMission[]
 }
 
 model UserMission {

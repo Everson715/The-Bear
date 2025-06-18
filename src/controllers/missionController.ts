@@ -1,50 +1,64 @@
-import { Request, Response } from "express";
-import { missionService } from "../services/missionService";
+import { Request, Response } from 'express';
+import { MissionService } from '../services/missionService';
 
-export const missionController = {
-  async create(req: Request, res: Response) {
-    try {
-      const mission = await missionService.create(req.body);
-      res.status(201).json(mission);
-    } catch (err: any) {
-      res.status(500).json({ error: err.message });
-    }
-  },
+const missionService = new MissionService();
 
-  async getAll(req: Request, res: Response) {
+export const MissionController = {
+  async getAllMissions(req: Request, res: Response) {
     try {
-      const missions = await missionService.getAll();
+      const missions = await missionService.getAllMissions();
       res.json(missions);
-    } catch (err: any) {
-      res.status(500).json({ error: err.message });
+    } catch (error: any) {
+      console.error('Erro ao buscar missões:', error);
+      res.status(500).json({ error: error.message || 'Erro ao buscar missões.' });
     }
   },
 
-  async getUserMissions(req: Request, res: Response) {
+  async getMissionById(req: Request, res: Response) {
     try {
-      const userId = req.params.userId;
-      if (!userId) return res.status(400).json({ error: "userId inválido" });
-
-      const missions = await missionService.checkAndGetMissions(userId);
-      res.json(missions);
-    } catch (err: any) {
-      res.status(500).json({ error: err.message });
-    }
-  },
-
-  async complete(req: Request, res: Response) {
-    try {
-      const userId = req.params.userId;
-      const missionId = Number(req.params.id);
-
-      if (!userId || isNaN(missionId)) {
-        return res.status(400).json({ error: "Parâmetros inválidos" });
+      const id = parseInt(req.params.id, 10);
+      const mission = await missionService.getMissionById(id);
+      if (!mission) {
+        return res.status(404).json({ message: 'Missão não encontrada.' });
       }
+      res.json(mission);
+    } catch (error: any) {
+      console.error('Erro ao buscar missão por ID:', error);
+      res.status(400).json({ error: error.message || 'Erro ao buscar missão.' });
+    }
+  },
 
-      const result = await missionService.complete(userId, missionId);
-      res.json(result);
-    } catch (err: any) {
-      res.status(500).json({ error: err.message });
+  async createMission(req: Request, res: Response) {
+    try {
+      const { title, description, category, requiredCategories } = req.body;
+      const mission = await missionService.createMission({ title, description, category, requiredCategories });
+      res.status(201).json(mission);
+    } catch (error: any) {
+      console.error('Erro ao criar missão:', error);
+      res.status(400).json({ error: error.message || 'Erro ao criar missão.' });
+    }
+  },
+
+  async updateMission(req: Request, res: Response) {
+    try {
+      const id = parseInt(req.params.id, 10);
+      const { title, description, category, requiredCategories } = req.body;
+      const updatedMission = await missionService.updateMission(id, { title, description, category, requiredCategories });
+      res.json(updatedMission);
+    } catch (error: any) {
+      console.error('Erro ao atualizar missão:', error);
+      res.status(400).json({ error: error.message || 'Erro ao atualizar missão.' });
+    }
+  },
+
+  async deleteMission(req: Request, res: Response) {
+    try {
+      const id = parseInt(req.params.id, 10);
+      await missionService.deleteMission(id);
+      res.json({ message: 'Missão deletada com sucesso.' });
+    } catch (error: any) {
+      console.error('Erro ao deletar missão:', error);
+      res.status(400).json({ error: error.message || 'Erro ao deletar missão.' });
     }
   }
 };

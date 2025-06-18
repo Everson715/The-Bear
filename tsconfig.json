@@ -1,16 +1,23 @@
 // tsconfig.json
 {
   "compilerOptions": {
-    "target": "es2016",
-    "module": "commonjs", // ou "esnext" se estiver configurando para ES Modules
-    "rootDir": "./",       // Ou "./src" se todo o seu código fonte estiver lá
+    // ... other options
     "outDir": "./dist",
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
+    "rootDir": "./src",
     "strict": true,
+    "esModuleInterop": true,
     "skipLibCheck": true,
-    "resolveJsonModule": true // Útil se for importar JSON
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "typeRoots": [
+      "./node_modules/@types",
+      "./src/@types" // Make sure this path is correct
+    ],
+    "module": "CommonJS", // Or "ESNext" if using ES modules
+    "target": "ES2021",
+    "lib": ["ES2021"],
+    "sourceMap": true
   },
-  "include": ["**/*.ts"], // Inclui todos os arquivos .ts
-  "exclude": ["node_modules", "dist"] // Exclui pastas de módulos e build
+  "include": ["src/**/*.ts", "src/@types/**/*.d.ts"], // Ensure type definitions are included
+  "exclude": ["node_modules", "dist"]
 }

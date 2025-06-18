@@ -1,12 +1,13 @@
 // src/controllers/menuController.ts
 import { Request, Response } from 'express';
-// Supondo que você tenha um MenuService ou diretamente use o Prisma
-import { prisma } from '../utils/prisma'; // Ou importe seu MenuService
+import { MenuItemService } from '../services/MenuItemService';
 
-export const menuController = { // <-- EXPORTE UM OBJETO COM OS MÉTODOS
+const menuItemService = new MenuItemService();
+
+export const menuController = {
   async getAllMenuItems(req: Request, res: Response) {
     try {
-      const items = await prisma.menuItem.findMany();
+      const items = await menuItemService.getAll();
       res.json(items);
     } catch (error: any) {
       console.error("Error fetching menu items:", error);
@@ -17,7 +18,7 @@ export const menuController = { // <-- EXPORTE UM OBJETO COM OS MÉTODOS
   async getMenuItemById(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const item = await prisma.menuItem.findUnique({ where: { id: parseInt(id) } });
+      const item = await menuItemService.getById(parseInt(id));
       if (!item) {
         return res.status(404).json({ error: "Menu item not found." });
       }
@@ -31,9 +32,7 @@ export const menuController = { // <-- EXPORTE UM OBJETO COM OS MÉTODOS
   async createMenuItem(req: Request, res: Response) {
     try {
       const { name, description, price, imageUrl, category, xpGain, coffeeBeansGain } = req.body;
-      const newItem = await prisma.menuItem.create({
-        data: { name, description, price, imageUrl, category, xpGain, coffeeBeansGain },
-      });
+      const newItem = await menuItemService.create({ name, description, price, imageUrl, category, xpGain, coffeeBeansGain });
       res.status(201).json(newItem);
     } catch (error: any) {
       console.error("Error creating menu item:", error);
@@ -45,10 +44,7 @@ export const menuController = { // <-- EXPORTE UM OBJETO COM OS MÉTODOS
     try {
       const { id } = req.params;
       const { name, description, price, imageUrl, category, xpGain, coffeeBeansGain } = req.body;
-      const updatedItem = await prisma.menuItem.update({
-        where: { id: parseInt(id) },
-        data: { name, description, price, imageUrl, category, xpGain, coffeeBeansGain },
-      });
+      const updatedItem = await menuItemService.update(parseInt(id), { name, description, price, imageUrl, category, xpGain, coffeeBeansGain });
       res.json(updatedItem);
     } catch (error: any) {
       console.error("Error updating menu item:", error);
@@ -59,8 +55,8 @@ export const menuController = { // <-- EXPORTE UM OBJETO COM OS MÉTODOS
   async deleteMenuItem(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      await prisma.menuItem.delete({ where: { id: parseInt(id) } });
-      res.status(204).send(); // No Content
+      await menuItemService.remove(parseInt(id));
+      res.status(204).send();
     } catch (error: any) {
       console.error("Error deleting menu item:", error);
       res.status(500).json({ error: error.message || "Failed to delete menu item." });
@@ -69,11 +65,8 @@ export const menuController = { // <-- EXPORTE UM OBJETO COM OS MÉTODOS
 
   async getCategories(req: Request, res: Response) {
     try {
-      const categories = await prisma.menuItem.findMany({
-        distinct: ['category'],
-        select: { category: true }
-      });
-      res.json(categories.map(c => c.category).filter(Boolean)); // Filtra null/undefined
+      const categories = await menuItemService.getCategories();
+      res.json(categories);
     } catch (error: any) {
       console.error("Error fetching categories:", error);
       res.status(500).json({ error: error.message || "Failed to fetch categories." });

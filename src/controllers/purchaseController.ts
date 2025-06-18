@@ -1,145 +1,129 @@
 // src/controllers/PurchaseController.ts
-import { Request, Response } from "express";
-import { purchaseService } from "../services/purchaseService"; // Importe o objeto purchaseService
+import { Request, Response } from 'express';
+import { purchaseService } from '../services/purchaseService';
 
-// Certifique-se de que a interface Request do Express está estendida
-// com a propriedade 'user' populada pelo seu authMiddleware.
-// Isso deve estar em src/types/express.d.ts (verificado no Passo 1)
-
-// Exporta um objeto com os métodos, em vez de uma classe
 export const purchaseController = {
-  async create(req: Request, res: Response) { // Se você usa uma rota de compra direta
-    try {
-      const userId = req.user?.userId; // Pega o ID do usuário do token
-      const { menuItemId } = req.body;
-      if (!userId || !menuItemId) {
-        return res.status(400).json({ error: "userId e menuItemId são obrigatórios." });
-      }
-      const purchase = await purchaseService.create(userId, menuItemId);
-      res.status(201).json(purchase);
-    } catch (error: any) {
-      console.error("Erro ao criar compra:", error);
-      res.status(500).json({ error: error.message || "Erro interno do servidor." });
-    }
-  },
-
-  async getAll(req: Request, res: Response) { // Se você tem uma rota para admins verem todas as compras
-    try {
-      const purchases = await purchaseService.getAll();
-      res.status(200).json(purchases);
-    } catch (error: any) {
-      console.error("Erro ao obter todas as compras:", error);
-      res.status(500).json({ error: error.message || "Erro interno do servidor." });
-    }
-  },
-
   async getCartByUserId(req: Request, res: Response) {
     try {
-      // O userId pode vir dos parâmetros da rota ou do token, dependendo do design.
-      // Se a rota for /cart, use req.user.userId
-      const userId = req.user?.userId || req.params.userId; // Prefira o ID do token
+      const userId = req.user?.userId;
       if (!userId) {
-        return res.status(400).json({ error: "ID do usuário é obrigatório." });
+        return res.status(401).json({ message: "Usuário não autenticado." });
+      }
+      if (req.user?.userId !== userId && !req.user?.isAdmin) {
+        return res.status(403).json({ error: "Acesso negado para ver este carrinho." });
       }
       const cart = await purchaseService.getCartByUserId(userId);
-      res.status(200).json(cart);
+      res.json(cart);
     } catch (error: any) {
-      console.error("Erro ao obter carrinho:", error);
-      res.status(500).json({ error: error.message || "Erro interno do servidor ao obter carrinho." });
+      console.error("Error fetching user cart:", error);
+      res.status(500).json({ error: error.message || "Failed to fetch cart." });
     }
   },
 
   async addToCart(req: Request, res: Response) {
     try {
       const userId = req.user?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Usuário não autenticado." });
+      }
       const { menuItemId, quantity } = req.body;
-      if (!userId || !menuItemId || !quantity) {
-        return res.status(400).json({ error: "userId, menuItemId e quantity são obrigatórios." });
+      if (!menuItemId || !quantity || quantity < 1) {
+        return res.status(400).json({ error: "menuItemId e quantity são obrigatórios e quantity deve ser maior que 0." });
       }
       await purchaseService.addToCart(userId, menuItemId, quantity);
       res.status(200).json({ message: "Item adicionado ao carrinho com sucesso." });
     } catch (error: any) {
-      console.error("Erro ao adicionar ao carrinho:", error);
-      res.status(500).json({ error: error.message || "Erro interno do servidor ao adicionar ao carrinho." });
+      console.error("Error adding to cart:", error);
+      res.status(400).json({ error: error.message || "Failed to add item to cart." });
     }
   },
 
   async updateCartItemQuantity(req: Request, res: Response) {
     try {
       const userId = req.user?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Usuário não autenticado." });
+      }
       const { cartItemId } = req.params;
       const { newQuantity } = req.body;
-      if (!userId || !cartItemId || typeof newQuantity !== 'number') {
-        return res.status(400).json({ error: "userId, cartItemId e newQuantity são obrigatórios." });
+      if (typeof newQuantity !== 'number' || newQuantity < 0) {
+        return res.status(400).json({ error: "newQuantity é obrigatório e deve ser um número não negativo." });
       }
+      // Usar cartItemId como string direto, sem parseInt
       await purchaseService.updateCartItemQuantity(userId, cartItemId, newQuantity);
-      res.status(200).json({ message: "Quantidade do item no carrinho atualizada." });
+      res.status(200).json({ message: "Quantidade do item no carrinho atualizada com sucesso." });
     } catch (error: any) {
-      console.error("Erro ao atualizar item do carrinho:", error);
-      res.status(500).json({ error: error.message || "Erro interno do servidor ao atualizar carrinho." });
+      console.error("Error updating cart item quantity:", error);
+      res.status(400).json({ error: error.message || "Failed to update cart item quantity." });
     }
   },
 
   async removeFromCart(req: Request, res: Response) {
     try {
       const userId = req.user?.userId;
-      const { cartItemId } = req.params;
-      if (!userId || !cartItemId) {
-        return res.status(400).json({ error: "userId e cartItemId são obrigatórios." });
+      if (!userId) {
+        return res.status(401).json({ message: "Usuário não autenticado." });
       }
+      const { cartItemId } = req.params;
+      // Usar cartItemId como string direto, sem parseInt
       await purchaseService.removeFromCart(userId, cartItemId);
-      res.status(200).json({ message: "Item removido do carrinho." });
+      res.status(200).json({ message: "Item removido do carrinho com sucesso." });
     } catch (error: any) {
-      console.error("Erro ao remover do carrinho:", error);
-      res.status(500).json({ error: error.message || "Erro interno do servidor ao remover do carrinho." });
+      console.error("Error removing from cart:", error);
+      res.status(400).json({ error: error.message || "Failed to remove item from cart." });
     }
   },
 
   async checkoutCart(req: Request, res: Response) {
     try {
       const userId = req.user?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Usuário não autenticado." });
+      }
       const { paymentMethod } = req.body;
-      if (!userId || !paymentMethod) {
-        return res.status(400).json({ error: "userId e paymentMethod são obrigatórios." });
-      }
       if (paymentMethod !== 'cash' && paymentMethod !== 'coffeeBeans') {
-          return res.status(400).json({ error: "Método de pagamento inválido. Use 'cash' ou 'coffeeBeans'." });
+        return res.status(400).json({ error: "Método de pagamento inválido. Use 'cash' ou 'coffeeBeans'." });
       }
-
-      const newPurchase = await purchaseService.checkoutCart(userId, paymentMethod);
-      res.status(200).json(newPurchase);
+      const purchase = await purchaseService.checkoutCart(userId, paymentMethod);
+      res.status(200).json(purchase);
     } catch (error: any) {
-      console.error("Erro ao finalizar compra:", error);
-      res.status(500).json({ error: error.message || "Erro interno do servidor ao finalizar compra." });
+      console.error("Error checking out cart:", error);
+      res.status(400).json({ error: error.message || "Failed to checkout cart." });
     }
   },
 
   async getUserPurchases(req: Request, res: Response) {
     try {
-      const userId = req.user?.userId || req.params.userId; // Pega o userId do token ou params
+      const userId = req.user?.userId;
       if (!userId) {
         return res.status(401).json({ message: "Usuário não autenticado." });
       }
+      if (req.user?.userId !== userId && !req.user?.isAdmin) {
+        return res.status(403).json({ error: "Acesso negado para ver estas compras." });
+      }
       const purchases = await purchaseService.getUserPurchases(userId);
-      res.status(200).json(purchases);
+      res.json(purchases);
     } catch (error: any) {
-      console.error("Erro ao obter pedidos do usuário:", error);
-      res.status(500).json({ error: error.message || "Erro interno do servidor." });
+      console.error("Error fetching user purchases:", error);
+      res.status(500).json({ error: error.message || "Failed to fetch user purchases." });
     }
   },
 
-  async buyItemWithCoffeeBeans(req: Request, res: Response) { // Se você precisar disso
+  async buyItemWithCoffeeBeans(req: Request, res: Response) {
     try {
       const userId = req.user?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Usuário não autenticado." });
+      }
       const { menuItemId } = req.body;
-      if (!userId || !menuItemId) {
-        return res.status(400).json({ error: "userId e menuItemId são obrigatórios." });
+      if (!menuItemId) {
+        return res.status(400).json({ error: "menuItemId é obrigatório." });
       }
       const purchase = await purchaseService.buyItemWithCoffeeBeans(userId, menuItemId);
       res.status(200).json(purchase);
     } catch (error: any) {
-      console.error("Erro ao comprar item com grãos:", error);
-      res.status(500).json({ error: error.message || "Erro interno do servidor." });
+      console.error("Error buying item with coffee beans:", error);
+      res.status(400).json({ error: error.message || "Failed to buy item with coffee beans." });
     }
   }
 };
