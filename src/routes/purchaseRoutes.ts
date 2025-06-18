@@ -12,6 +12,9 @@ router.post("/cart/add", authMiddleware, purchaseController.addToCart); // POST 
 router.put("/cart/update/:cartItemId", authMiddleware, purchaseController.updateCartItemQuantity); // PUT /api/purchases/cart/update/:cartItemId
 router.delete("/cart/remove/:cartItemId", authMiddleware, purchaseController.removeFromCart); // DELETE /api/purchases/cart/remove/:cartItemId
 router.post("/cart/checkout", authMiddleware, purchaseController.checkoutCart); // POST /api/purchases/cart/checkout
+router.get('/cart/:userId', purchaseController.getCartByUserId);
+router.get('/purchases/user/:userId', purchaseController.getUserPurchases);
+
 
 router.get("/user/:userId", authMiddleware, purchaseController.getUserPurchases); // GET /api/purchases/user/:userId
 

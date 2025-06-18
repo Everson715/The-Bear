@@ -1,4 +1,3 @@
-<!-- frontend/dashboard.html -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -33,7 +32,6 @@
         <li><a href="#" class="active" id="dashboardLink">Dashboard</a></li>
         <li><a href="#" id="myOrdersLink">Meus Pedidos</a></li>
         <li><a href="#">Configurações</a></li>
-        <!-- Adicionar link para painel de administração se o usuário for admin -->
         <li id="adminDashboardLink" style="display: none;"><a href="admin-dashboard.html">Painel Admin</a></li>
       </ul>
     </aside>
@@ -41,7 +39,6 @@
     <section class="dashboard-content">
       <h2 id="welcomeMessage">Bem-vindo, Aventureiro(a)!</h2>
 
-      <!-- Informações de XP, Grãos, Nível do Usuário -->
       <div class="user-info-summary">
         <h3>Seu Status</h3>
         <p>Nível: <span id="userLevel">Carregando...</span></p>
@@ -75,7 +72,6 @@
         </div>
       </div>
 
-      <!-- Nova seção para Meus Pedidos -->
       <div class="my-orders-section" id="myOrdersSection" style="display: none;">
         <h3>Seus Pedidos Recentes</h3>
         <div id="myOrdersContainer">
@@ -114,15 +110,14 @@
   </footer>
 
   <script>
-    const API_BASE_URL = "http://localhost:3000/api"; // Rota base da API
+    const API_BASE_URL = "http://localhost:3000/api";
     const userId = localStorage.getItem("userId");
     const token = localStorage.getItem("token");
     const isAdmin = localStorage.getItem("isAdmin") === "true";
 
-    let currentCartItems = []; // Armazenar itens do carrinho para cálculo de custo em grãos
-    let userCoffeeBeans = 0; // Armazenar grãos do usuário
+    let currentCartItems = [];
+    let userCoffeeBeans = 0;
 
-    // Redireciona para login se não houver userId ou token
     if (!userId || !token) {
         alert("Você precisa estar logado para acessar o dashboard.");
         window.location.href = "login.html";
@@ -131,16 +126,23 @@
     document.addEventListener('DOMContentLoaded', () => {
       document.getElementById("current-year").textContent = new Date().getFullYear();
 
-      // Exibir link do painel admin se for admin
       if (isAdmin) {
           document.getElementById('adminDashboardLink').style.display = 'block';
       }
 
-      fetchUserProfile(); // Carrega dados do usuário (XP, Grãos, Nível)
-      fetchMenuItems();
-      fetchCartItems();
+      // Load data in parallel for a better user experience
+      Promise.all([
+          fetchUserProfile(),
+          fetchMenuItems(),
+          fetchCartItems()
+      ]).then(() => {
+          // After all data is fetched, ensure payment display is correct
+          updatePaymentDisplay();
+      }).catch(error => {
+          console.error("Erro ao carregar o dashboard:", error);
+          alert("Ocorreu um erro ao carregar o dashboard. Por favor, tente novamente.");
+      });
 
-      // Event listeners para a sidebar
       document.getElementById('dashboardLink').addEventListener('click', (e) => {
           e.preventDefault();
           document.querySelector('.menu-section').style.display = 'block';
@@ -162,20 +164,45 @@
           fetchUserOrders();
       });
 
-      // Event listeners para o método de pagamento
       document.querySelectorAll('input[name="paymentMethod"]').forEach(radio => {
           radio.addEventListener('change', updatePaymentDisplay);
       });
+
+      document.getElementById('logoutBtn').addEventListener('click', () => {
+          localStorage.removeItem('userId');
+          localStorage.removeItem('isAdmin');
+          localStorage.removeItem('token');
+          window.location.href = 'login.html';
+      });
+
+      document.getElementById('checkoutBtn').addEventListener('click', async () => {
+          if (!confirm('Deseja finalizar sua compra?')) {
+              return;
+          }
+
+          const selectedPaymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+
+          try {
+              const res = await fetch(`${API_BASE_URL}/cart/checkout`, {
+                  method: 'POST',
+                  headers: {
+                      'Content-Type': 'application/json',
+                      'Authorization': `Bearer ${token}`
+                  },
+                  body: JSON.stringify({ paymentMethod: selectedPaymentMethod })
+              });
+
+              await handleApiResponse(res);
+              alert('Compra finalizada com sucesso! Acompanhe seus pedidos.');
+              await fetchCartItems(); // The cart should be empty after checkout
+              fetchUserProfile(); // Update user's XP and CoffeeBeans after purchase
+          } catch (error) {
+              console.error("Erro ao finalizar compra:", error);
+              alert(`Erro ao finalizar compra: ${error.message}`);
+          }
+      });
     });
 
-    document.getElementById('logoutBtn').addEventListener('click', () => {
-        localStorage.removeItem('userId');
-        localStorage.removeItem('isAdmin');
-        localStorage.removeItem('token');
-        window.location.href = 'login.html';
-    });
-
-    // Função auxiliar para lidar com respostas de API e erros
     async function handleApiResponse(response) {
         const contentType = response.headers.get("content-type");
         if (response.ok) {
@@ -191,10 +218,9 @@
         }
     }
 
-    // NOVA FUNÇÃO: Busca o perfil do usuário (XP, Grãos, Nível)
     async function fetchUserProfile() {
         try {
-            const res = await fetch(`${API_BASE_URL}/profile`, { // Chamada para a nova rota /api/profile
+            const res = await fetch(`${API_BASE_URL}/profile`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const userData = await handleApiResponse(res);
@@ -202,11 +228,14 @@
             document.getElementById('userLevel').textContent = userData.level || 'N/A';
             document.getElementById('userXp').textContent = userData.xp || 0;
             document.getElementById('userCoffeeBeans').textContent = userData.coffeeBeans || 0;
-            userCoffeeBeans = userData.coffeeBeans || 0; // Armazena os grãos do usuário para uso no cálculo do carrinho
-            updatePaymentDisplay(); // Atualiza a exibição do custo em grãos
+            userCoffeeBeans = userData.coffeeBeans || 0;
+            // Removed updatePaymentDisplay() here; it will be called after all fetches.
         } catch (error) {
             console.error("Erro ao carregar perfil do usuário:", error);
-            // Fallback para exibir "Carregando..." ou mensagem de erro
+            document.getElementById('welcomeMessage').textContent = `Bem-vindo(a), Aventureiro(a)! (Erro ao carregar perfil)`;
+            document.getElementById('userLevel').textContent = 'Erro';
+            document.getElementById('userXp').textContent = 'Erro';
+            document.getElementById('userCoffeeBeans').textContent = 'Erro';
         }
     }
 
@@ -245,7 +274,7 @@
 
         document.querySelectorAll('.add-to-cart-btn').forEach(button => {
             button.addEventListener('click', async (e) => {
-                const menuItemId = parseInt(e.target.dataset.menuItemId); // Usar parseInt
+                const menuItemId = parseInt(e.target.dataset.menuItemId, 10); // Use radix 10
                 await addToCart(menuItemId, 1);
             });
         });
@@ -277,30 +306,33 @@
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const cart = await handleApiResponse(res);
-            currentCartItems = cart.items || []; // Armazena os itens do carrinho
+            // Assuming cart object has a 'items' array and a 'total' property
+            currentCartItems = cart.items || [];
             displayCartItems(currentCartItems);
             updateCartTotal(cart.total || 0);
-            updatePaymentDisplay(); // Atualiza a exibição do custo em grãos
+            // Removed updatePaymentDisplay() here; it will be called after all fetches.
         } catch (error) {
             console.error("Erro ao carregar carrinho:", error);
             document.getElementById('cartItemsContainer').innerHTML = `<p class="error-message">Erro ao carregar o carrinho: ${error.message}</p>`;
             updateCartTotal(0);
             currentCartItems = [];
-            updatePaymentDisplay();
+            // Removed updatePaymentDisplay() here; it will be called after all fetches.
         }
     }
 
     function displayCartItems(items) {
         const container = document.getElementById('cartItemsContainer');
         container.innerHTML = '';
-        document.getElementById('checkoutBtn').disabled = true;
 
+        // The checkout button's state is now primarily controlled by updatePaymentDisplay()
+        // but we need a base state for it.
         if (!Array.isArray(items) || items.length === 0) {
             container.innerHTML = '<p>Seu carrinho está vazio. Adicione alguns itens do menu!</p>';
+            document.getElementById('checkoutBtn').disabled = true; // No items, cannot checkout
+            document.getElementById('checkoutBtn').textContent = 'Finalizar Compra'; // Reset text
+            document.getElementById('checkoutBtn').classList.remove('btn-disabled-red'); // Remove warning style
             return;
         }
-
-        document.getElementById('checkoutBtn').disabled = false;
 
         const table = document.createElement('table');
         table.innerHTML = `
@@ -337,7 +369,7 @@
         document.querySelectorAll('.item-quantity-input').forEach(input => {
             input.addEventListener('change', async (e) => {
                 const cartItemId = e.target.dataset.cartItemId;
-                const newQuantity = parseInt(e.target.value);
+                const newQuantity = parseInt(e.target.value, 10); // Use radix 10
                 if (newQuantity > 0) {
                     await updateCartItemQuantity(cartItemId, newQuantity);
                 } else {
@@ -368,6 +400,7 @@
             await handleApiResponse(res);
             alert('Quantidade atualizada!');
             await fetchCartItems();
+            fetchUserProfile(); // Re-fetch user profile to update coffee beans if XP/beans are affected by changes
         } catch (error) {
             console.error("Erro ao atualizar carrinho:", error);
             alert(`Erro ao atualizar quantidade: ${error.message}`);
@@ -384,6 +417,7 @@
             await handleApiResponse(res);
             alert('Item removido do carrinho!');
             await fetchCartItems();
+            fetchUserProfile(); // Re-fetch user profile to update coffee beans if XP/beans are affected by changes
         } catch (error) {
             console.error("Erro ao remover do carrinho:", error);
             alert(`Erro ao remover item: ${error.message}`);
@@ -394,74 +428,60 @@
         document.getElementById('cartTotal').textContent = `R$ ${total.toFixed(2)}`;
     }
 
-    // NOVA FUNÇÃO: Atualiza a exibição de custo em grãos e estado do botão de checkout
+    // Corrigida e melhorada: Atualiza a exibição de custo em grãos e estado do botão de checkout
     function updatePaymentDisplay() {
         const payCoffeeBeansRadio = document.getElementById('payCoffeeBeans');
         const coffeeBeansCostDisplay = document.getElementById('coffeeBeansCostDisplay');
         const beansCostSpan = document.getElementById('beansCost');
         const checkoutBtn = document.getElementById('checkoutBtn');
 
+        // Calculate total cost in coffee beans (assuming xpGain is the cost)
         let totalCostInCoffeeBeans = 0;
-        if (payCoffeeBeansRadio.checked) {
-            // Calcular o custo total em grãos dos itens no carrinho
-            // currentCartItems deve ter sido populado por fetchCartItems
-            totalCostInCoffeeBeans = currentCartItems.reduce((sum, item) => sum + (item.menuItem.xpGain || 0) * item.quantity, 0); // Usando xpGain como custo em grãos
-            coffeeBeansCostDisplay.style.display = 'inline';
-            beansCostSpan.textContent = totalCostInCoffeeBeans;
+        // IMPORTANT: Ensure `currentCartItems` contains `xpGain` directly, as per `ProcessedCartItem` in backend
+        if (Array.isArray(currentCartItems)) {
+            totalCostInCoffeeBeans = currentCartItems.reduce((sum, item) => sum + (item.xpGain || 0) * item.quantity, 0);
+        }
+        beansCostSpan.textContent = totalCostInCoffeeBeans;
 
-            // Desabilitar botão se não houver grãos suficientes
-            if (userCoffeeBeans < totalCostInCoffeeBeans) {
-                checkoutBtn.disabled = true;
-                checkoutBtn.textContent = 'Grãos Insuficientes!';
-                checkoutBtn.classList.add('btn-disabled-red'); // Adiciona classe para estilização de aviso
-            } else {
-                checkoutBtn.disabled = false;
-                checkoutBtn.textContent = 'Finalizar Compra';
-                checkoutBtn.classList.remove('btn-disabled-red');
+        // Determine if checkout button should be enabled/disabled
+        const cartHasItems = currentCartItems.length > 0;
+        let canCheckout = false;
+        let buttonText = 'Finalizar Compra';
+        let buttonStyleClass = '';
+
+        if (cartHasItems) {
+            if (payCoffeeBeansRadio.checked) {
+                coffeeBeansCostDisplay.style.display = 'inline';
+                if (userCoffeeBeans < totalCostInCoffeeBeans) {
+                    canCheckout = false;
+                    buttonText = 'Grãos Insuficientes!';
+                    buttonStyleClass = 'btn-disabled-red';
+                } else {
+                    canCheckout = true;
+                }
+            } else { // payCash is checked
+                coffeeBeansCostDisplay.style.display = 'none';
+                canCheckout = true;
             }
         } else {
-            // Se o pagamento for em dinheiro
-            coffeeBeansCostDisplay.style.display = 'none';
-            // Re-habilitar o botão se houver itens no carrinho (para pagamento em dinheiro)
-            if (currentCartItems.length > 0) {
-                checkoutBtn.disabled = false;
-                checkoutBtn.textContent = 'Finalizar Compra';
-                checkoutBtn.classList.remove('btn-disabled-red');
-            } else {
-                checkoutBtn.disabled = true;
-            }
+            // Cart is empty, cannot checkout
+            canCheckout = false;
+            buttonText = 'Finalizar Compra'; // Reset to default text
+            coffeeBeansCostDisplay.style.display = 'none'; // Hide beans cost if cart empty
+        }
+
+        checkoutBtn.disabled = !canCheckout;
+        checkoutBtn.textContent = buttonText;
+        // Remove any existing specific button style classes before adding the new one
+        checkoutBtn.classList.remove('btn-disabled-red');
+        if (buttonStyleClass) {
+            checkoutBtn.classList.add(buttonStyleClass);
         }
     }
 
-    document.getElementById('checkoutBtn').addEventListener('click', async () => {
-        if (!confirm('Deseja finalizar sua compra?')) {
-            return;
-        }
-
-        const selectedPaymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
-
-        try {
-            const res = await fetch(`${API_BASE_URL}/cart/checkout`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ paymentMethod: selectedPaymentMethod })
-            });
-
-            await handleApiResponse(res);
-            alert('Compra finalizada com sucesso! Acompanhe seus pedidos.');
-            await fetchCartItems(); // O carrinho deve estar vazio após o checkout
-            fetchUserProfile(); // Atualiza XP e Grãos do usuário após a compra
-        } catch (error) {
-            console.error("Erro ao finalizar compra:", error);
-            alert(`Erro ao finalizar compra: ${error.message}`);
-        }
-    });
-
     async function fetchUserOrders() {
         try {
+            // The route should be /purchases/user/:userId in your backend router
             const res = await fetch(`${API_BASE_URL}/purchases/user/${userId}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -486,10 +506,12 @@
             const orderCard = document.createElement('div');
             orderCard.className = 'order-card';
             const orderDate = new Date(order.createdAt).toLocaleDateString('pt-BR');
-            // Calcula o custo total em grãos para exibição no histórico
+
+            // Calculate the total cost in beans for this specific order's items
             let orderTotalCoffeeBeansCost = 0;
             order.items.forEach(item => {
-                orderTotalCoffeeBeansCost += (item.menuItem.xpGain || 0) * item.quantity;
+                // Ensure item.menuItem is accessible and has xpGain
+                orderTotalCoffeeBeansCost += (item.menuItem?.xpGain || 0) * item.quantity;
             });
 
             orderCard.innerHTML = `
@@ -498,7 +520,7 @@
                 <h5>Itens:</h5>
                 <ul>
                     ${order.items.map(item => `
-                        <li>${item.quantity}x ${item.itemName} (R$ ${item.priceAtPurchase.toFixed(2)} cada) - XP Ganhos: ${(item.menuItem.xpGain || 0) * item.quantity} | Grãos Ganhos: ${(item.menuItem.coffeeBeansGain || 0) * item.quantity}</li>
+                        <li>${item.quantity}x ${item.itemName} (R$ ${item.priceAtPurchase.toFixed(2)} cada) - XP Ganhos: ${(item.menuItem?.xpGain || 0) * item.quantity} | Grãos Ganhos: ${(item.menuItem?.coffeeBeansGain || 0) * item.quantity}</li>
                     `).join('')}
                 </ul>
             `;

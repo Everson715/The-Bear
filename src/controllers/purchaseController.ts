@@ -5,18 +5,20 @@ import { purchaseService } from '../services/purchaseService';
 export const purchaseController = {
   async getCartByUserId(req: Request, res: Response) {
     try {
-      const userId = req.user?.userId;
-      if (!userId) {
-        return res.status(401).json({ message: "Usuário não autenticado." });
+      const userIdFromParam = req.params.userId; // Get userId from URL parameter
+      const authenticatedUserId = req.user?.userId; // Get userId from authenticated user (from token)
+
+      // IMPORTANT SECURITY CHECK: Ensure the user is only fetching their *own* cart,
+      // unless this route is specifically for admins.
+      if (userIdFromParam !== authenticatedUserId && !req.user?.isAdmin) {
+          return res.status(403).json({ message: "Acesso negado. Você só pode ver seu próprio carrinho." });
       }
-      if (req.user?.userId !== userId && !req.user?.isAdmin) {
-        return res.status(403).json({ error: "Acesso negado para ver este carrinho." });
-      }
-      const cart = await purchaseService.getCartByUserId(userId);
-      res.json(cart);
+
+      const cart = await purchaseService.getCartByUserId(userIdFromParam);
+      res.status(200).json(cart);
     } catch (error: any) {
-      console.error("Error fetching user cart:", error);
-      res.status(500).json({ error: error.message || "Failed to fetch cart." });
+      console.error("Erro ao buscar carrinho do usuário:", error);
+      res.status(500).json({ message: error.message || "Erro interno do servidor." });
     }
   },
 
@@ -94,18 +96,20 @@ export const purchaseController = {
 
   async getUserPurchases(req: Request, res: Response) {
     try {
-      const userId = req.user?.userId;
-      if (!userId) {
-        return res.status(401).json({ message: "Usuário não autenticado." });
+      const userIdFromParam = req.params.userId; // Get userId from URL parameter
+      const authenticatedUserId = req.user?.userId; // Get userId from authenticated user (from token)
+
+      // IMPORTANT SECURITY CHECK: Ensure the user is only fetching their *own* purchases,
+      // unless this route is specifically for admins.
+      if (userIdFromParam !== authenticatedUserId && !req.user?.isAdmin) {
+          return res.status(403).json({ message: "Acesso negado. Você só pode ver seus próprios pedidos." });
       }
-      if (req.user?.userId !== userId && !req.user?.isAdmin) {
-        return res.status(403).json({ error: "Acesso negado para ver estas compras." });
-      }
-      const purchases = await purchaseService.getUserPurchases(userId);
-      res.json(purchases);
+
+      const purchases = await purchaseService.getUserPurchases(userIdFromParam);
+      res.status(200).json(purchases);
     } catch (error: any) {
-      console.error("Error fetching user purchases:", error);
-      res.status(500).json({ error: error.message || "Failed to fetch user purchases." });
+      console.error("Erro ao buscar pedidos do usuário:", error);
+      res.status(500).json({ message: error.message || "Erro interno do servidor." });
     }
   },
 

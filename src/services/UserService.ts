@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { prisma } from "../utils/prisma";
 
-const jwtSecret = process.env.JWT_SECRET || "secreta-do-bear"; // Garanta que este SECRET é o mesmo usado para assinar o JWT
+const jwtSecret = process.env.JWT_SECRET || "secreta-do-bear";
 
 export class UserService {
   async register(name: string, email: string, password: string) {
@@ -21,8 +21,8 @@ export class UserService {
         password: hashedPassword,
         xp: 0,
         coffeeBeans: 0,
-        level: "Urso Curioso"
-      }
+        level: "Urso Curioso",
+      },
     });
   }
 
@@ -37,8 +37,8 @@ export class UserService {
         xp: true,
         coffeeBeans: true,
         level: true,
-        isAdmin: true
-      }
+        isAdmin: true,
+      },
     });
 
     if (!user) throw new Error("Email ou senha inválidos");
@@ -47,7 +47,7 @@ export class UserService {
     if (!isMatch) throw new Error("Email ou senha inválidos");
 
     const token = jwt.sign(
-      { userId: user.id, isAdmin: user.isAdmin }, // INCLUIR isAdmin no payload do token para o frontend
+      { userId: user.id, isAdmin: user.isAdmin },
       jwtSecret,
       { expiresIn: "1d" }
     );
@@ -56,23 +56,28 @@ export class UserService {
 
     return {
       user: userWithoutPassword,
-      token
+      token,
     };
   }
 
-  async findById(id: string) { // Mantido como está no seu código fornecido
-    return await prisma.user.findUnique({
+  async findById(id: string) {
+    const user = await prisma.user.findUnique({
       where: { id },
       include: {
         purchases: true,
-        notifications: true
-      }
+        notifications: true,
+      },
     });
+
+    if (!user) {
+      throw new Error("Usuário não encontrado.");
+    }
+    return user;
   }
 
-  // NOVO MÉTODO PARA O PERFIL DO DASHBOARD (busca apenas dados essenciais)
-  async getUserProfile(userId: string) {
-    const user = await prisma.user.findUnique({
+  // Novo método para pegar perfil resumido (dashboard)
+  async getProfile(userId: string) {
+    return prisma.user.findUnique({
       where: { id: userId },
       select: {
         id: true,
@@ -84,10 +89,5 @@ export class UserService {
         isAdmin: true,
       },
     });
-
-    if (!user) {
-      throw new Error("Usuário não encontrado.");
-    }
-    return user;
   }
 }

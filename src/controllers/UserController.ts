@@ -2,17 +2,6 @@
 import { Request, Response } from "express";
 import { UserService } from "../services/UserService";
 
-// IMPORTANTE: Adicione esta declaração global em um arquivo .d.ts (ex: src/types/express.d.ts)
-// para que req.user seja reconhecido globalmente.
-// NÃO é recomendado colocar esta declaração aqui diretamente em um arquivo .ts que não seja .d.ts
-// declare global {
-//   namespace Express {
-//     interface Request {
-//       user?: { userId: string; isAdmin: boolean; };
-//     }
-//   }
-// }
-
 const userService = new UserService(); // Instancie o serviço aqui
 
 // Exporte o controller como um objeto com os métodos
@@ -55,15 +44,22 @@ export const UserController = {
 
   async getUserProfile(req: Request, res: Response) {
     try {
-      const userId = req.user?.userId; // Pega o ID do usuário do token via authMiddleware
+      // The userId is attached to req.user by authMiddleware
+      const userId = req.user?.userId;
+
       if (!userId) {
         return res.status(401).json({ message: "Usuário não autenticado." });
       }
-      const userProfile = await userService.getUserProfile(userId); // Chama o novo método do serviço
-      res.status(200).json(userProfile);
+
+      const user = await userService.getProfile(userId); // Call a service method to fetch profile
+      if (!user) {
+        return res.status(404).json({ message: "Perfil do usuário não encontrado." });
+      }
+      res.status(200).json(user);
     } catch (error: any) {
-      console.error("Erro ao obter perfil do usuário:", error);
-      res.status(500).json({ error: error.message || "Erro interno do servidor." });
+      console.error("Erro ao buscar perfil do usuário:", error);
+      res.status(500).json({ message: error.message || "Erro interno do servidor." });
     }
-  }
+  },
+
 };
