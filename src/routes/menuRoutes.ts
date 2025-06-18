@@ -1,14 +1,15 @@
 // src/routes/menuRoutes.ts
 import express from "express";
-import { menuController } from "../controllers/menuController"; // Verifique o caminho
-import { isAdmin } from "../middlewares/isAdmin"; // Verifique o caminho
+import { menuController } from "../controllers/menuController"; // Verifique se o caminho para menuController.ts está correto
+import { isAdmin } from "../middlewares/isAdmin"; // Verifique se o caminho para isAdmin.ts está correto
 
 const router = express.Router();
 
-// Público - visualizar menu (Ex: GET /api/menu/)
+// Rotas de Menu (serão acessíveis via /api/menu)
+// Público - visualizar menu
 router.get("/", menuController.getAll);
 
-// Privado - apenas admin (Ex: POST /api/menu/, PUT /api/menu/:id, DELETE /api/menu/:id)
+// Privado - apenas admin
 router.post("/", isAdmin, menuController.create);
 router.put("/:id", isAdmin, menuController.update);
 router.delete("/:id", isAdmin, menuController.remove);

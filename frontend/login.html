@@ -76,7 +76,6 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      // Atualiza o ano do rodapé
       document.getElementById("current-year").textContent = new Date().getFullYear();
     });
 
@@ -99,25 +98,27 @@
           body: JSON.stringify(data),
         });
 
-        // --- LÓGICA DE TRATAMENTO DE ERRO APRIMORADA ---
+        // LÓGICA DE TRATAMENTO DE ERRO APRIMORADA PARA EVITAR "Body has already been consumed"
         if (!res.ok) {
-          let errorMessage = "Erro desconhecido. Verifique suas credenciais.";
+          let errorMessage = "Erro desconhecido. Por favor, tente novamente.";
           const contentType = res.headers.get("content-type");
 
           if (contentType && contentType.includes("application/json")) {
+            // Se a resposta for JSON, tenta parsear para pegar a mensagem de erro
             const errorBody = await res.json();
             errorMessage = errorBody.message || errorBody.error || `Erro: ${res.status} ${res.statusText}`;
           } else {
-            const errorText = await res.text(); // Lê o corpo como texto para depuração
-            console.error("Resposta não JSON:", errorText);
-            errorMessage = `Erro do servidor: ${res.status} ${res.statusText || 'Não Encontrado'}. Detalhes: ${errorText.substring(0, Math.min(errorText.length, 100))}...`; // Mostra parte do texto
+            // Se a resposta NÃO for JSON (como um 404 HTML padrão), pega o status e o texto bruto
+            const errorText = await res.text();
+            console.error("Login: Resposta do servidor não JSON:", errorText);
+            errorMessage = `Erro do servidor: ${res.status} ${res.statusText || 'Não Encontrado'}. Detalhes: ${errorText.substring(0, Math.min(errorText.length, 100))}...`;
           }
           alert(errorMessage);
           return;
         }
-        // --- FIM DA LÓGICA DE TRATAMENTO DE ERRO ---
 
-        const response = await res.json(); // Tenta parsear JSON APENAS se a resposta for OK
+        // Continua APENAS se a resposta for OK (res.ok é true)
+        const response = await res.json();
 
         const user = response.user;
         if (!user) {

@@ -19,7 +19,7 @@ const app = express();
 
 // Configuração do CORS: Permite que seu frontend (http://127.0.0.1:5500) se comunique com o backend.
 app.use(cors({
-  origin: "http://127.0.0.1:5500", // A origem exata do seu frontend (ajustado para o que apareceu no erro)
+  origin: "http://127.0.0.1:5500", // A origem exata do seu frontend (baseado nos erros anteriores)
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH"], // Métodos HTTP permitidos
   allowedHeaders: ["Content-Type", "Authorization"], // Cabeçalhos permitidos nas requisições
   credentials: true // Importante para permitir o envio de cookies ou credenciais (se usados)
@@ -32,6 +32,7 @@ app.use(express.json());
 
 // Monta as rotas de usuário/autenticação sob o prefixo "/auth".
 // Isso significa que router.post("/login") em userRoutes.ts será acessível via POST /auth/login.
+// E router.post("/register") em userRoutes.ts será acessível via POST /auth/register.
 app.use("/auth", userRoutes);
 
 // Monta as outras rotas (menu, notificações, missões, compras) sob o prefixo "/api".

@@ -1,13 +1,12 @@
 // src/routes/userRoutes.ts
 import { Router } from "express";
-import { UserController } from "../controllers/UserController"; // Verifique o caminho
+import { UserController } from "../controllers/UserController"; // Verifique se o caminho está correto
 
 const router = Router();
 const controller = new UserController();
 
-// Ex: POST /auth/login
+// Rotas de Usuário/Autenticação (serão acessíveis via /auth)
 router.post("/login", (req, res) => controller.login(req, res));
-// Ex: POST /auth/register
 router.post("/register", (req, res) => controller.register(req, res));
 
 export default router;

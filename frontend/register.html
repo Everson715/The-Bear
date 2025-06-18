@@ -81,7 +81,6 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-    // Atualiza o ano do rodapé
     document.getElementById("current-year").textContent = new Date().getFullYear();
   });
 
@@ -103,21 +102,35 @@
     }
 
     try {
-      const response = await fetch('http://localhost:3000/api/users', {
+      // AQUI ESTÁ A URL CORRIGIDA PARA O REGISTRO
+      const response = await fetch('http://localhost:3000/auth/register', { // <-- ALTERADO PARA /auth/register
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, password })
       });
 
-      const data = await response.json();
+      // LÓGICA DE TRATAMENTO DE ERRO APRIMORADA
+      if (!response.ok) {
+        let errorMessage = 'Erro ao cadastrar. Tente novamente mais tarde.';
+        const contentType = response.headers.get("content-type");
 
-      if (response.ok) {
-        alert('Cadastro realizado com sucesso! Agora você pode fazer login.');
-        window.location.href = 'login.html';
-      } else {
-        // Exibe a mensagem de erro vinda da API, se disponível
-        alert(data.error || 'Erro ao cadastrar. Tente novamente mais tarde.');
+        if (contentType && contentType.includes("application/json")) {
+          const errorBody = await response.json();
+          errorMessage = errorBody.message || errorBody.error || `Erro: ${response.status} ${response.statusText}`;
+        } else {
+          const errorText = await response.text();
+          console.error("Register: Resposta do servidor não JSON:", errorText);
+          errorMessage = `Erro do servidor: ${response.status} ${response.statusText || 'Não Encontrado'}. Detalhes: ${errorText.substring(0, Math.min(errorText.length, 100))}...`;
+        }
+        alert(errorMessage);
+        return;
       }
+
+      const data = await response.json(); // Só tenta parsear se response.ok for true
+
+      alert('Cadastro realizado com sucesso! Agora você pode fazer login.');
+      window.location.href = 'login.html';
+
     } catch (error) {
       console.error('Erro de conexão ao cadastrar:', error);
       alert('Erro de conexão com o servidor. Por favor, tente novamente.');

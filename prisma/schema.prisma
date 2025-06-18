@@ -1,3 +1,5 @@
+// schema.prisma (Corrigido)
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -12,13 +14,14 @@ model User {
   name          String
   email         String         @unique
   password      String
-  isAdmin       Boolean        @default(false) // <--- AQUI
+  isAdmin       Boolean        @default(false)
   xp            Int            @default(0)
   coffeeBeans   Int            @default(0)
   level         String         @default("Urso Curioso")
   notifications Notification[]
-  purchases     Purchase[]
+  purchases     Purchase[]     // Relação existente com Purchase
   userMissions  UserMission[]
+  cart          Cart?          // <--- NOVO: Relação com o Cart (um usuário pode ter um carrinho)
 }
 
 model Notification {
@@ -32,43 +35,73 @@ model Notification {
 }
 
 model MenuItem {
-  id        Int        @id @default(autoincrement())
-  name      String
+  id          Int          @id @default(autoincrement())
+  name        String
   description String?
-  category  String
-  price     Float
-  imageUrl  String?
-  purchases Purchase[]
-}
-
-model Purchase {
-  id         Int       @id @default(autoincrement())
-  menuItemId Int
-  userId     String
-  createdAt  DateTime  @default(now())
-
-  menuItem   MenuItem  @relation(fields: [menuItemId], references: [id])
-  user       User      @relation(fields: [userId], references: [id])
+  category    String
+  price       Float
+  imageUrl    String?
+  // purchases   Purchase[]  // <--- REMOVIDO: Purchase agora se relaciona com PurchaseItem, não diretamente com MenuItem
+  purchaseItems PurchaseItem[] // <--- NOVO: Relação com PurchaseItem
+  cartItems   CartItem[]   // <--- NOVO: Relação com CartItem
 }
 
 model Mission {
-  id                 Int     @id @default(autoincrement())
+  id                 Int           @id @default(autoincrement())
   title              String
   description        String?
-  category           String   // <-- adicionado aqui
+  category           String
   requiredCategories String?
 
   userMissions UserMission[]
 }
 
-
 model UserMission {
   userId    String
   missionId Int
-  completed Boolean  @default(false)
+  completed Boolean @default(false)
 
   user    User    @relation(fields: [userId], references: [id])
   mission Mission @relation(fields: [missionId], references: [id])
 
   @@id([userId, missionId])
+}
+
+model PurchaseItem {
+  id            String    @id @default(uuid())
+  purchaseId    String
+  purchase      Purchase  @relation(fields: [purchaseId], references: [id])
+  menuItemId    Int
+  menuItem      MenuItem  @relation(fields: [menuItemId], references: [id]) // <--- AQUI: AgoraMenuItem tem o purchaseItems[]
+  quantity      Int
+  priceAtPurchase Float   // O preço do item no momento da compra (para histórico)
+}
+
+model Purchase {
+  id        String       @id @default(uuid())
+  userId    String
+  user      User         @relation(fields: [userId], references: [id])
+  total     Float        @default(0)
+  status    String       @default("Completed")
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  items     PurchaseItem[]
+}
+
+model Cart {
+  id        String    @id @default(uuid())
+  userId    String    @unique
+  user      User      @relation(fields: [userId], references: [id]) // <--- AQUI: User agora tem o campo 'cart'
+  items     CartItem[]
+}
+
+model CartItem {
+  id          String    @id @default(uuid())
+  cartId      String
+  cart        Cart      @relation(fields: [cartId], references: [id])
+  menuItemId  Int
+  menuItem    MenuItem  @relation(fields: [menuItemId], references: [id]) // <--- AQUI: MenuItem agora tem o cartItems[]
+  quantity    Int
+  itemName    String
+  itemPrice   Float
 }

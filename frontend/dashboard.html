@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Bear | Dashboard do Usuário</title>
+  <link rel="stylesheet" href="style.css" /> <link rel="stylesheet" href="dashboard.css" /> <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+
+<body>
+  <header>
+    <div class="container">
+        <div class="logo">
+            <h1>The Bear</h1>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="#" id="logoutBtn">Sair</a></li> </ul>
+        </nav>
+        <div class="navbar-buttons">
+            </div>
+    </div>
+  </header>
+
+  <main class="dashboard-main">
+    <aside class="dashboard-sidebar">
+      <h3>Minha Conta</h3>
+      <ul>
+        <li><a href="#" class="active">Dashboard</a></li>
+        <li><a href="#">Meus Pedidos</a></li>
+        <li><a href="#">Configurações</a></li>
+      </ul>
+    </aside>
+
+    <section class="dashboard-content">
+      <h2>Bem-vindo, Aventureiro(a)!</h2>
+
+      <div class="menu-section">
+        <h3>Nosso Menu de Aventuras</h3>
+        <div id="menuItemsContainer" class="menu-items-grid">
+          <p>Carregando menu...</p>
+        </div>
+      </div>
+
+      <div class="cart-section">
+        <h3>Seu Carrinho de Expedição</h3>
+        <div id="cartItemsContainer" class="cart-table-container">
+          <p>Seu carrinho está vazio. Adicione alguns itens do menu!</p>
+        </div>
+        <div class="cart-summary">
+            <h4>Total do Carrinho: <span id="cartTotal">R$ 0.00</span></h4>
+            <button id="checkoutBtn" class="btn-primary" disabled>Finalizar Compra</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-brand">
+        <h3>The Bear</h3>
+        <p>Transformando cafés em aventuras.</p>
+      </div>
+
+      <div class="footer-social">
+        <h4>Redes Sociais</h4>
+        <a href="https://www.instagram.com/everson.syfy_7/" target="_blank" rel="noopener noreferrer">
+          <i class="fab fa-instagram"></i> Instagram
+        </a>
+        <a href="https://github.com/Everson715" target="_blank" rel="noopener noreferrer">
+          <i class="fab fa-github"></i> GitHub
+        </a>
+        <a href="https://www.linkedin.com/in/josé-everson" target="_blank" rel="noopener noreferrer">
+            <i class="fab fa-linkedin"></i> LinkedIn
+        </a>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>© <span id="current-year"></span> The Bear. Todos os direitos reservados.</p>
+      <p>Power by <strong>Artorias</strong>.</p>
+    </div>
+  </footer>
+
+  <script>
+    const API_BASE_URL = "http://localhost:3000";
+    const userId = localStorage.getItem("userId"); // Obtém o userId do localStorage
+    const token = localStorage.getItem("token"); // Obtém o token do localStorage
+
+    // Redireciona para login se não houver userId ou token
+    if (!userId || !token) {
+        alert("Você precisa estar logado para acessar o dashboard.");
+        window.location.href = "login.html";
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById("current-year").textContent = new Date().getFullYear();
+      fetchMenuItems();
+      fetchCartItems();
+    });
+
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+        localStorage.removeItem('userId');
+        localStorage.removeItem('isAdmin');
+        localStorage.removeItem('token');
+        window.location.href = 'login.html';
+    });
+
+    // Função auxiliar para lidar com respostas de API e erros
+    async function handleApiResponse(response) {
+        const contentType = response.headers.get("content-type");
+        if (response.ok) {
+            return contentType && contentType.includes("application/json") ? await response.json() : {};
+        } else {
+            let errorData = { message: "Ocorreu um erro no servidor." };
+            if (contentType && contentType.includes("application/json")) {
+                errorData = await response.json();
+            } else {
+                errorData.message = await response.text();
+            }
+            throw new Error(errorData.message || "Erro desconhecido da API.");
+        }
+    }
+
+    async function fetchMenuItems() {
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/menu`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const menuItems = await handleApiResponse(res);
+            displayMenuItems(menuItems);
+        } catch (error) {
+            console.error("Erro ao carregar menu:", error);
+            document.getElementById('menuItemsContainer').innerHTML = `<p class="error-message">Erro ao carregar o menu: ${error.message}</p>`;
+        }
+    }
+
+    function displayMenuItems(items) {
+        const container = document.getElementById('menuItemsContainer');
+        container.innerHTML = ''; // Limpa o conteúdo existente
+        if (!Array.isArray(items) || items.length === 0) {
+            container.innerHTML = '<p>Nenhum item disponível no menu no momento.</p>';
+            return;
+        }
+        items.forEach(item => {
+            const itemCard = document.createElement('div');
+            itemCard.className = 'menu-item-card';
+            itemCard.innerHTML = `
+                <h4>${item.name}</h4>
+                <p>${item.description}</p>
+                <p class="price">R$ ${item.price.toFixed(2)}</p>
+                <button class="add-to-cart-btn" data-menu-item-id="${item.id}" data-item-name="${item.name}" data-item-price="${item.price}">Adicionar ao Carrinho</button>
+            `;
+            container.appendChild(itemCard);
+        });
+
+        // Adiciona event listeners para os botões "Adicionar ao Carrinho"
+        document.querySelectorAll('.add-to-cart-btn').forEach(button => {
+            button.addEventListener('click', async (e) => {
+                // Usando data-menu-item-id para o ID do item do menu
+                const menuItemId = e.target.dataset.menuItemId;
+                // itemName e itemPrice seriam melhor obtidos do backend para garantir consistência
+                // Mas para este exemplo do frontend, estamos pegando dos data-attributes
+                const itemName = e.target.dataset.itemName;
+                const itemPrice = parseFloat(e.target.dataset.itemPrice);
+                await addToCart(menuItemId, itemName, itemPrice, 1); // Adiciona 1 unidade
+            });
+        });
+    }
+
+    async function addToCart(menuItemId, itemName, itemPrice, quantity) {
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/purchases/add-to-cart`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ menuItemId, quantity }) // userId vem do token no backend
+            });
+
+            await handleApiResponse(res); // Apenas verifica se a resposta foi OK
+            alert('Item adicionado ao carrinho!');
+            await fetchCartItems(); // Atualiza o carrinho após adicionar
+        } catch (error) {
+            console.error("Erro ao adicionar ao carrinho:", error);
+            alert(`Erro ao adicionar item ao carrinho: ${error.message}`);
+        }
+    }
+
+    async function fetchCartItems() {
+        try {
+            // userId vem do token no backend, mas a rota ainda espera um param para compatibilidade
+            // Se seu backend usa o req.user.id do token, você pode simplificar para `/api/purchases/cart`
+            const res = await fetch(`${API_BASE_URL}/api/purchases/cart/${userId}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const cart = await handleApiResponse(res);
+            displayCartItems(cart.items || []); // Assume que a resposta tem um array 'items'
+            updateCartTotal(cart.total || 0); // Assume que a resposta tem um 'total'
+        } catch (error) {
+            console.error("Erro ao carregar carrinho:", error);
+            document.getElementById('cartItemsContainer').innerHTML = `<p class="error-message">Erro ao carregar o carrinho: ${error.message}</p>`;
+            updateCartTotal(0);
+        }
+    }
+
+    function displayCartItems(items) {
+        const container = document.getElementById('cartItemsContainer');
+        container.innerHTML = ''; // Limpa o conteúdo existente
+        document.getElementById('checkoutBtn').disabled = true; // Desabilita por padrão
+
+        if (!Array.isArray(items) || items.length === 0) {
+            container.innerHTML = '<p>Seu carrinho está vazio. Adicione alguns itens do menu!</p>';
+            return;
+        }
+
+        document.getElementById('checkoutBtn').disabled = false; // Habilita o botão se houver itens
+
+        const table = document.createElement('table');
+        table.innerHTML = `
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Preço Unit.</th>
+                    <th>Quantidade</th>
+                    <th>Subtotal</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        `;
+        const tbody = table.querySelector('tbody');
+
+        items.forEach(item => {
+            const row = document.createElement('tr');
+            // Adiciona data-label para responsividade
+            row.innerHTML = `
+                <td data-label="Item">${item.itemName}</td>
+                <td data-label="Preço Unit.">R$ ${item.itemPrice.toFixed(2)}</td>
+                <td data-label="Quantidade">
+                    <input type="number" min="1" value="${item.quantity}" class="item-quantity-input" data-cart-item-id="${item.id}" />
+                </td>
+                <td data-label="Subtotal">R$ ${(item.itemPrice * item.quantity).toFixed(2)}</td>
+                <td data-label="Ações">
+                    <button class="remove-item-btn" data-cart-item-id="${item.id}">Remover</button>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+        container.appendChild(table);
+
+        // Adiciona event listeners para os inputs de quantidade
+        document.querySelectorAll('.item-quantity-input').forEach(input => {
+            input.addEventListener('change', async (e) => {
+                const cartItemId = e.target.dataset.cartItemId; // O ID do item no carrinho (é o `id` da entrada no carrinho)
+                const newQuantity = parseInt(e.target.value);
+                if (newQuantity > 0) {
+                    await updateCartItemQuantity(cartItemId, newQuantity);
+                } else {
+                    await removeFromCart(cartItemId); // Se a quantidade for 0, remove
+                }
+            });
+        });
+
+        // Adiciona event listeners para os botões "Remover"
+        document.querySelectorAll('.remove-item-btn').forEach(button => {
+            button.addEventListener('click', async (e) => {
+                const cartItemId = e.target.dataset.cartItemId; // O ID do item no carrinho
+                await removeFromCart(cartItemId);
+            });
+        });
+    }
+
+    async function updateCartItemQuantity(cartItemId, newQuantity) {
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/purchases/update-cart-item/${cartItemId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ quantity: newQuantity })
+            });
+
+            await handleApiResponse(res);
+            alert('Quantidade atualizada!');
+            await fetchCartItems();
+        } catch (error) {
+            console.error("Erro ao atualizar carrinho:", error);
+            alert(`Erro ao atualizar quantidade: ${error.message}`);
+        }
+    }
+
+    async function removeFromCart(cartItemId) {
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/purchases/remove-from-cart/${cartItemId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            await handleApiResponse(res);
+            alert('Item removido do carrinho!');
+            await fetchCartItems();
+        } catch (error) {
+            console.error("Erro ao remover do carrinho:", error);
+            alert(`Erro ao remover item: ${error.message}`);
+        }
+    }
+
+    function updateCartTotal(total) {
+        document.getElementById('cartTotal').textContent = `R$ ${total.toFixed(2)}`;
+    }
+
+    document.getElementById('checkoutBtn').addEventListener('click', async () => {
+        if (!confirm('Deseja finalizar sua compra?')) {
+            return;
+        }
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/purchases/checkout`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ userId }) // userId é enviado, mas o backend idealmente pegaria do token
+            });
+
+            await handleApiResponse(res);
+            alert('Compra finalizada com sucesso! Acompanhe seus pedidos.');
+            await fetchCartItems(); // O carrinho deve estar vazio após o checkout
+        } catch (error) {
+            console.error("Erro ao finalizar compra:", error);
+            alert(`Erro ao finalizar compra: ${error.message}`);
+        }
+    });
+  </script>
+</body>
+</html>
