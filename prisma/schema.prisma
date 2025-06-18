@@ -55,10 +55,12 @@ model Mission {
   id                 Int     @id @default(autoincrement())
   title              String
   description        String?
-  requiredCategories  String?  // Exemplo: armazenar JSON string ou CSV
+  category           String   // <-- adicionado aqui
+  requiredCategories String?
 
   userMissions UserMission[]
 }
+
 
 model UserMission {
   userId    String

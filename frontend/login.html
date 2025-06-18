@@ -90,7 +90,8 @@
       };
 
       try {
-        const res = await fetch("http://localhost:3000/api/users/login", {
+        // AQUI ESTÁ A URL CORRIGIDA PARA O LOGIN
+        const res = await fetch("http://localhost:3000/auth/login", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -98,13 +99,25 @@
           body: JSON.stringify(data),
         });
 
-        const response = await res.json();
-
+        // --- LÓGICA DE TRATAMENTO DE ERRO APRIMORADA ---
         if (!res.ok) {
-          // Melhorar o tratamento de erro, mostrando a mensagem do servidor se disponível
-          alert(response.error || "Erro no login. Verifique suas credenciais.");
+          let errorMessage = "Erro desconhecido. Verifique suas credenciais.";
+          const contentType = res.headers.get("content-type");
+
+          if (contentType && contentType.includes("application/json")) {
+            const errorBody = await res.json();
+            errorMessage = errorBody.message || errorBody.error || `Erro: ${res.status} ${res.statusText}`;
+          } else {
+            const errorText = await res.text(); // Lê o corpo como texto para depuração
+            console.error("Resposta não JSON:", errorText);
+            errorMessage = `Erro do servidor: ${res.status} ${res.statusText || 'Não Encontrado'}. Detalhes: ${errorText.substring(0, Math.min(errorText.length, 100))}...`; // Mostra parte do texto
+          }
+          alert(errorMessage);
           return;
         }
+        // --- FIM DA LÓGICA DE TRATAMENTO DE ERRO ---
+
+        const response = await res.json(); // Tenta parsear JSON APENAS se a resposta for OK
 
         const user = response.user;
         if (!user) {
