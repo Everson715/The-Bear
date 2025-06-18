@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>The Bear | Admin - Gerenciar Menu</title>
+  <title>The Bear | Admin - Gerenciar Missões</title>
   <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="admin-dashboard.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,8 +20,9 @@
         </div>
         <nav>
             <ul>
-                <li><a href="admin-dashboard.html" class="active">Gerenciar Itens do Menu</a></li>
-                <li><a href="admin-missions.html">Gerenciar Missões</a></li>
+                <li><a href="admin-dashboard.html">Gerenciar Itens do Menu</a></li>
+                <li><a href="admin-missions.html" class="active">Gerenciar Missões</a></li>
+                <li><a href="dashboard.html">Voltar ao Dashboard</a></li>
             </ul>
         </nav>
         <div class="navbar-buttons">
@@ -31,39 +32,40 @@
   </header>
 
   <main class="container admin-dashboard">
-    <h2>Painel do Administrador - Gerenciar Menu</h2>
+    <h2>Painel do Administrador - Gerenciar Missões</h2>
 
-    <div id="menu-items-section-container" class="admin-feature-section">
+    <div id="missions-section-container" class="admin-feature-section">
         <section class="admin-section">
-            <h3>Adicionar/Editar Item do Menu</h3>
-            <form id="menu-form">
-                <input type="hidden" id="menuItemId" name="id" value="">
-                <input type="text" name="name" placeholder="Nome do Item" required />
-
+            <h3>Adicionar/Editar Missão</h3>
+            <form id="mission-form">
+                <input type="hidden" id="missionId" name="id" value="">
+                <input type="text" name="title" placeholder="Título da Missão" required />
+                <textarea name="description" placeholder="Descrição da Missão (opcional)"></textarea>
+                
                 <div class="input-group">
-                    <label for="category">Categoria:</label>
-                    <select id="category" name="category" required>
+                    <label for="missionCategory">Categoria da Missão:</label>
+                    <select id="missionCategory" name="category" required>
                         </select>
                 </div>
+                
+                <div class="input-group">
+                    <label for="requiredCategories">Categorias de Item Necessárias (separadas por vírgula):</label>
+                    <input type="text" id="requiredCategories" name="requiredCategories" placeholder="Ex: Bebidas com Café,Sobremesas" />
+                    <small>Use vírgula para separar múltiplas categorias. Devem corresponder às categorias do menu.</small>
+                </div>
 
-                <input type="number" name="price" placeholder="Preço (Ex: 15.99)" step="0.01" required />
-                <input type="url" name="imageUrl" placeholder="URL da Imagem (Ex: https://via.placeholder.com/150)" />
-                <textarea name="description" placeholder="Descrição detalhada do item"></textarea>
-                <input type="number" name="xpGain" placeholder="XP Ganho" value="0" required />
-                <input type="number" name="coffeeBeansGain" placeholder="Grãos de Café Ganhos" value="0" required />
-
-                <button type="submit" class="btn-primary" id="menuFormSubmitBtn">Criar Item</button>
-                <button type="button" class="btn-secondary" id="menuFormClearBtn" style="display: none;">Cancelar Edição</button>
+                <button type="submit" class="btn-primary" id="missionFormSubmitBtn">Criar Missão</button>
+                <button type="button" class="btn-secondary" id="missionFormClearBtn" style="display: none;">Cancelar Edição</button>
             </form>
         </section>
 
         <hr>
 
         <section class="admin-section">
-            <h3>Itens no Menu</h3>
-            <div id="menu-list-container">
-                <ul id="menu-list">
-                    <p>Carregando itens do menu...</p>
+            <h3>Missões Ativas</h3>
+            <div id="mission-list-container">
+                <ul id="mission-list">
+                    <p>Carregando missões...</p>
                 </ul>
             </div>
         </section>
@@ -98,6 +100,6 @@
     </div>
   </footer>
 
-  <script src="scripts/admin-menu.js"></script>
+  <script src="scripts/admin-missions.js"></script>
 </body>
 </html>
