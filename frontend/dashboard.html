@@ -1,3 +1,4 @@
+<!-- frontend/dashboard.html -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -19,10 +20,9 @@
         <nav>
             <ul>
                 <li><a href="index.html">Home</a></li>
-                <li><button class="btn-primary" id="logoutBtn">Sair</button></li>
+                <li><a href="#" id="logoutBtn">Sair</a></li>
+            </ul>
         </nav>
-        <div class="navbar-buttons">
-            </div>
     </div>
   </header>
 
@@ -30,14 +30,24 @@
     <aside class="dashboard-sidebar">
       <h3>Minha Conta</h3>
       <ul>
-        <li><a href="#" class="active">Dashboard</a></li>
-        <li><a href="#">Meus Pedidos</a></li>
+        <li><a href="#" class="active" id="dashboardLink">Dashboard</a></li>
+        <li><a href="#" id="myOrdersLink">Meus Pedidos</a></li>
         <li><a href="#">Configurações</a></li>
+        <!-- Adicionar link para painel de administração se o usuário for admin -->
+        <li id="adminDashboardLink" style="display: none;"><a href="admin-dashboard.html">Painel Admin</a></li>
       </ul>
     </aside>
 
     <section class="dashboard-content">
-      <h2>Bem-vindo, Aventureiro(a)!</h2>
+      <h2 id="welcomeMessage">Bem-vindo, Aventureiro(a)!</h2>
+
+      <!-- Informações de XP, Grãos, Nível do Usuário -->
+      <div class="user-info-summary">
+        <h3>Seu Status</h3>
+        <p>Nível: <span id="userLevel">Carregando...</span></p>
+        <p>XP: <span id="userXp">Carregando...</span></p>
+        <p>Grãos de Café: <span id="userCoffeeBeans">Carregando...</span></p>
+      </div>
 
       <div class="menu-section">
         <h3>Nosso Menu de Aventuras</h3>
@@ -47,15 +57,32 @@
       </div>
 
       <div class="cart-section">
-        <h3>Seu Carrinho</h3>
+        <h3>Seu Carrinho de Expedição</h3>
         <div id="cartItemsContainer" class="cart-table-container">
           <p>Seu carrinho está vazio. Adicione alguns itens do menu!</p>
         </div>
         <div class="cart-summary">
             <h4>Total do Carrinho: <span id="cartTotal">R$ 0.00</span></h4>
+            <div class="payment-options">
+                <label>Método de Pagamento:</label>
+                <input type="radio" id="payCash" name="paymentMethod" value="cash" checked>
+                <label for="payCash">Dinheiro</label>
+                <input type="radio" id="payCoffeeBeans" name="paymentMethod" value="coffeeBeans">
+                <label for="payCoffeeBeans">Grãos de Café</label>
+                <span id="coffeeBeansCostDisplay" style="display:none; margin-left: 10px;">Custo em Grãos: <span id="beansCost">0</span></span>
+            </div>
             <button id="checkoutBtn" class="btn-primary" disabled>Finalizar Compra</button>
         </div>
       </div>
+
+      <!-- Nova seção para Meus Pedidos -->
+      <div class="my-orders-section" id="myOrdersSection" style="display: none;">
+        <h3>Seus Pedidos Recentes</h3>
+        <div id="myOrdersContainer">
+          <p>Você ainda não fez nenhum pedido.</p>
+        </div>
+      </div>
+
     </section>
   </main>
 
@@ -87,9 +114,13 @@
   </footer>
 
   <script>
-    const API_BASE_URL = "http://localhost:3000";
-    const userId = localStorage.getItem("userId"); // Obtém o userId do localStorage
-    const token = localStorage.getItem("token"); // Obtém o token do localStorage
+    const API_BASE_URL = "http://localhost:3000/api"; // Rota base da API
+    const userId = localStorage.getItem("userId");
+    const token = localStorage.getItem("token");
+    const isAdmin = localStorage.getItem("isAdmin") === "true";
+
+    let currentCartItems = []; // Armazenar itens do carrinho para cálculo de custo em grãos
+    let userCoffeeBeans = 0; // Armazenar grãos do usuário
 
     // Redireciona para login se não houver userId ou token
     if (!userId || !token) {
@@ -99,8 +130,42 @@
 
     document.addEventListener('DOMContentLoaded', () => {
       document.getElementById("current-year").textContent = new Date().getFullYear();
+
+      // Exibir link do painel admin se for admin
+      if (isAdmin) {
+          document.getElementById('adminDashboardLink').style.display = 'block';
+      }
+
+      fetchUserProfile(); // Carrega dados do usuário (XP, Grãos, Nível)
       fetchMenuItems();
       fetchCartItems();
+
+      // Event listeners para a sidebar
+      document.getElementById('dashboardLink').addEventListener('click', (e) => {
+          e.preventDefault();
+          document.querySelector('.menu-section').style.display = 'block';
+          document.querySelector('.cart-section').style.display = 'block';
+          document.querySelector('.user-info-summary').style.display = 'block';
+          document.getElementById('myOrdersSection').style.display = 'none';
+          document.querySelector('.dashboard-sidebar ul li a.active')?.classList.remove('active');
+          e.target.classList.add('active');
+      });
+
+      document.getElementById('myOrdersLink').addEventListener('click', (e) => {
+          e.preventDefault();
+          document.querySelector('.menu-section').style.display = 'none';
+          document.querySelector('.cart-section').style.display = 'none';
+          document.querySelector('.user-info-summary').style.display = 'none';
+          document.getElementById('myOrdersSection').style.display = 'block';
+          document.querySelector('.dashboard-sidebar ul li a.active')?.classList.remove('active');
+          e.target.classList.add('active');
+          fetchUserOrders();
+      });
+
+      // Event listeners para o método de pagamento
+      document.querySelectorAll('input[name="paymentMethod"]').forEach(radio => {
+          radio.addEventListener('change', updatePaymentDisplay);
+      });
     });
 
     document.getElementById('logoutBtn').addEventListener('click', () => {
@@ -126,9 +191,28 @@
         }
     }
 
+    // NOVA FUNÇÃO: Busca o perfil do usuário (XP, Grãos, Nível)
+    async function fetchUserProfile() {
+        try {
+            const res = await fetch(`${API_BASE_URL}/profile`, { // Chamada para a nova rota /api/profile
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const userData = await handleApiResponse(res);
+            document.getElementById('welcomeMessage').textContent = `Bem-vindo(a), ${userData.name}!`;
+            document.getElementById('userLevel').textContent = userData.level || 'N/A';
+            document.getElementById('userXp').textContent = userData.xp || 0;
+            document.getElementById('userCoffeeBeans').textContent = userData.coffeeBeans || 0;
+            userCoffeeBeans = userData.coffeeBeans || 0; // Armazena os grãos do usuário para uso no cálculo do carrinho
+            updatePaymentDisplay(); // Atualiza a exibição do custo em grãos
+        } catch (error) {
+            console.error("Erro ao carregar perfil do usuário:", error);
+            // Fallback para exibir "Carregando..." ou mensagem de erro
+        }
+    }
+
     async function fetchMenuItems() {
         try {
-            const res = await fetch(`${API_BASE_URL}/api/menu`, {
+            const res = await fetch(`${API_BASE_URL}/menu`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const menuItems = await handleApiResponse(res);
@@ -141,7 +225,7 @@
 
     function displayMenuItems(items) {
         const container = document.getElementById('menuItemsContainer');
-        container.innerHTML = ''; // Limpa o conteúdo existente
+        container.innerHTML = '';
         if (!Array.isArray(items) || items.length === 0) {
             container.innerHTML = '<p>Nenhum item disponível no menu no momento.</p>';
             return;
@@ -151,41 +235,36 @@
             itemCard.className = 'menu-item-card';
             itemCard.innerHTML = `
                 <h4>${item.name}</h4>
-                <p>${item.description}</p>
+                <p>${item.description || 'Sem descrição'}</p>
                 <p class="price">R$ ${item.price.toFixed(2)}</p>
-                <button class="add-to-cart-btn" data-menu-item-id="${item.id}" data-item-name="${item.name}" data-item-price="${item.price}">Adicionar ao Carrinho</button>
+                <p class="gains">XP: ${item.xpGain || 0} | Grãos: ${item.coffeeBeansGain || 0}</p>
+                <button class="add-to-cart-btn" data-menu-item-id="${item.id}">Adicionar ao Carrinho</button>
             `;
             container.appendChild(itemCard);
         });
 
-        // Adiciona event listeners para os botões "Adicionar ao Carrinho"
         document.querySelectorAll('.add-to-cart-btn').forEach(button => {
             button.addEventListener('click', async (e) => {
-                // Usando data-menu-item-id para o ID do item do menu
-                const menuItemId = e.target.dataset.menuItemId;
-                // itemName e itemPrice seriam melhor obtidos do backend para garantir consistência
-                // Mas para este exemplo do frontend, estamos pegando dos data-attributes
-                const itemName = e.target.dataset.itemName;
-                const itemPrice = parseFloat(e.target.dataset.itemPrice);
-                await addToCart(menuItemId, itemName, itemPrice, 1); // Adiciona 1 unidade
+                const menuItemId = parseInt(e.target.dataset.menuItemId); // Usar parseInt
+                await addToCart(menuItemId, 1);
             });
         });
     }
 
-    async function addToCart(menuItemId, itemName, itemPrice, quantity) {
+    async function addToCart(menuItemId, quantity) {
         try {
-            const res = await fetch(`${API_BASE_URL}/api/purchases/add-to-cart`, {
+            const res = await fetch(`${API_BASE_URL}/cart/add`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ menuItemId, quantity }) // userId vem do token no backend
+                body: JSON.stringify({ menuItemId, quantity })
             });
 
-            await handleApiResponse(res); // Apenas verifica se a resposta foi OK
+            await handleApiResponse(res);
             alert('Item adicionado ao carrinho!');
-            await fetchCartItems(); // Atualiza o carrinho após adicionar
+            await fetchCartItems();
         } catch (error) {
             console.error("Erro ao adicionar ao carrinho:", error);
             alert(`Erro ao adicionar item ao carrinho: ${error.message}`);
@@ -194,32 +273,34 @@
 
     async function fetchCartItems() {
         try {
-            // userId vem do token no backend, mas a rota ainda espera um param para compatibilidade
-            // Se seu backend usa o req.user.id do token, você pode simplificar para `/api/purchases/cart`
-            const res = await fetch(`${API_BASE_URL}/api/purchases/cart/${userId}`, {
+            const res = await fetch(`${API_BASE_URL}/cart/${userId}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const cart = await handleApiResponse(res);
-            displayCartItems(cart.items || []); // Assume que a resposta tem um array 'items'
-            updateCartTotal(cart.total || 0); // Assume que a resposta tem um 'total'
+            currentCartItems = cart.items || []; // Armazena os itens do carrinho
+            displayCartItems(currentCartItems);
+            updateCartTotal(cart.total || 0);
+            updatePaymentDisplay(); // Atualiza a exibição do custo em grãos
         } catch (error) {
             console.error("Erro ao carregar carrinho:", error);
             document.getElementById('cartItemsContainer').innerHTML = `<p class="error-message">Erro ao carregar o carrinho: ${error.message}</p>`;
             updateCartTotal(0);
+            currentCartItems = [];
+            updatePaymentDisplay();
         }
     }
 
     function displayCartItems(items) {
         const container = document.getElementById('cartItemsContainer');
-        container.innerHTML = ''; // Limpa o conteúdo existente
-        document.getElementById('checkoutBtn').disabled = true; // Desabilita por padrão
+        container.innerHTML = '';
+        document.getElementById('checkoutBtn').disabled = true;
 
         if (!Array.isArray(items) || items.length === 0) {
             container.innerHTML = '<p>Seu carrinho está vazio. Adicione alguns itens do menu!</p>';
             return;
         }
 
-        document.getElementById('checkoutBtn').disabled = false; // Habilita o botão se houver itens
+        document.getElementById('checkoutBtn').disabled = false;
 
         const table = document.createElement('table');
         table.innerHTML = `
@@ -238,7 +319,6 @@
 
         items.forEach(item => {
             const row = document.createElement('tr');
-            // Adiciona data-label para responsividade
             row.innerHTML = `
                 <td data-label="Item">${item.itemName}</td>
                 <td data-label="Preço Unit.">R$ ${item.itemPrice.toFixed(2)}</td>
@@ -254,23 +334,21 @@
         });
         container.appendChild(table);
 
-        // Adiciona event listeners para os inputs de quantidade
         document.querySelectorAll('.item-quantity-input').forEach(input => {
             input.addEventListener('change', async (e) => {
-                const cartItemId = e.target.dataset.cartItemId; // O ID do item no carrinho (é o `id` da entrada no carrinho)
+                const cartItemId = e.target.dataset.cartItemId;
                 const newQuantity = parseInt(e.target.value);
                 if (newQuantity > 0) {
                     await updateCartItemQuantity(cartItemId, newQuantity);
                 } else {
-                    await removeFromCart(cartItemId); // Se a quantidade for 0, remove
+                    await removeFromCart(cartItemId);
                 }
             });
         });
 
-        // Adiciona event listeners para os botões "Remover"
         document.querySelectorAll('.remove-item-btn').forEach(button => {
             button.addEventListener('click', async (e) => {
-                const cartItemId = e.target.dataset.cartItemId; // O ID do item no carrinho
+                const cartItemId = e.target.dataset.cartItemId;
                 await removeFromCart(cartItemId);
             });
         });
@@ -278,13 +356,13 @@
 
     async function updateCartItemQuantity(cartItemId, newQuantity) {
         try {
-            const res = await fetch(`${API_BASE_URL}/api/purchases/update-cart-item/${cartItemId}`, {
+            const res = await fetch(`${API_BASE_URL}/cart/update/${cartItemId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ quantity: newQuantity })
+                body: JSON.stringify({ newQuantity })
             });
 
             await handleApiResponse(res);
@@ -298,7 +376,7 @@
 
     async function removeFromCart(cartItemId) {
         try {
-            const res = await fetch(`${API_BASE_URL}/api/purchases/remove-from-cart/${cartItemId}`, {
+            const res = await fetch(`${API_BASE_URL}/cart/remove/${cartItemId}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -316,28 +394,117 @@
         document.getElementById('cartTotal').textContent = `R$ ${total.toFixed(2)}`;
     }
 
+    // NOVA FUNÇÃO: Atualiza a exibição de custo em grãos e estado do botão de checkout
+    function updatePaymentDisplay() {
+        const payCoffeeBeansRadio = document.getElementById('payCoffeeBeans');
+        const coffeeBeansCostDisplay = document.getElementById('coffeeBeansCostDisplay');
+        const beansCostSpan = document.getElementById('beansCost');
+        const checkoutBtn = document.getElementById('checkoutBtn');
+
+        let totalCostInCoffeeBeans = 0;
+        if (payCoffeeBeansRadio.checked) {
+            // Calcular o custo total em grãos dos itens no carrinho
+            // currentCartItems deve ter sido populado por fetchCartItems
+            totalCostInCoffeeBeans = currentCartItems.reduce((sum, item) => sum + (item.menuItem.xpGain || 0) * item.quantity, 0); // Usando xpGain como custo em grãos
+            coffeeBeansCostDisplay.style.display = 'inline';
+            beansCostSpan.textContent = totalCostInCoffeeBeans;
+
+            // Desabilitar botão se não houver grãos suficientes
+            if (userCoffeeBeans < totalCostInCoffeeBeans) {
+                checkoutBtn.disabled = true;
+                checkoutBtn.textContent = 'Grãos Insuficientes!';
+                checkoutBtn.classList.add('btn-disabled-red'); // Adiciona classe para estilização de aviso
+            } else {
+                checkoutBtn.disabled = false;
+                checkoutBtn.textContent = 'Finalizar Compra';
+                checkoutBtn.classList.remove('btn-disabled-red');
+            }
+        } else {
+            // Se o pagamento for em dinheiro
+            coffeeBeansCostDisplay.style.display = 'none';
+            // Re-habilitar o botão se houver itens no carrinho (para pagamento em dinheiro)
+            if (currentCartItems.length > 0) {
+                checkoutBtn.disabled = false;
+                checkoutBtn.textContent = 'Finalizar Compra';
+                checkoutBtn.classList.remove('btn-disabled-red');
+            } else {
+                checkoutBtn.disabled = true;
+            }
+        }
+    }
+
     document.getElementById('checkoutBtn').addEventListener('click', async () => {
         if (!confirm('Deseja finalizar sua compra?')) {
             return;
         }
+
+        const selectedPaymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+
         try {
-            const res = await fetch(`${API_BASE_URL}/api/purchases/checkout`, {
+            const res = await fetch(`${API_BASE_URL}/cart/checkout`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ userId }) // userId é enviado, mas o backend idealmente pegaria do token
+                body: JSON.stringify({ paymentMethod: selectedPaymentMethod })
             });
 
             await handleApiResponse(res);
             alert('Compra finalizada com sucesso! Acompanhe seus pedidos.');
             await fetchCartItems(); // O carrinho deve estar vazio após o checkout
+            fetchUserProfile(); // Atualiza XP e Grãos do usuário após a compra
         } catch (error) {
             console.error("Erro ao finalizar compra:", error);
             alert(`Erro ao finalizar compra: ${error.message}`);
         }
     });
+
+    async function fetchUserOrders() {
+        try {
+            const res = await fetch(`${API_BASE_URL}/purchases/user/${userId}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const orders = await handleApiResponse(res);
+            displayUserOrders(orders);
+        } catch (error) {
+            console.error("Erro ao carregar pedidos do usuário:", error);
+            document.getElementById('myOrdersContainer').innerHTML = `<p class="error-message">Erro ao carregar seus pedidos: ${error.message}</p>`;
+        }
+    }
+
+    function displayUserOrders(orders) {
+        const container = document.getElementById('myOrdersContainer');
+        container.innerHTML = '';
+
+        if (!Array.isArray(orders) || orders.length === 0) {
+            container.innerHTML = '<p>Você ainda não fez nenhum pedido.</p>';
+            return;
+        }
+
+        orders.forEach(order => {
+            const orderCard = document.createElement('div');
+            orderCard.className = 'order-card';
+            const orderDate = new Date(order.createdAt).toLocaleDateString('pt-BR');
+            // Calcula o custo total em grãos para exibição no histórico
+            let orderTotalCoffeeBeansCost = 0;
+            order.items.forEach(item => {
+                orderTotalCoffeeBeansCost += (item.menuItem.xpGain || 0) * item.quantity;
+            });
+
+            orderCard.innerHTML = `
+                <h4>Pedido #${order.id.substring(0, 8)} - Data: ${orderDate}</h4>
+                <p>Total: R$ ${order.total.toFixed(2)} (${order.paymentMethod === 'coffeeBeans' ? `Pago com Grãos (${orderTotalCoffeeBeansCost})` : 'Pago com Dinheiro'})</p>
+                <h5>Itens:</h5>
+                <ul>
+                    ${order.items.map(item => `
+                        <li>${item.quantity}x ${item.itemName} (R$ ${item.priceAtPurchase.toFixed(2)} cada) - XP Ganhos: ${(item.menuItem.xpGain || 0) * item.quantity} | Grãos Ganhos: ${(item.menuItem.coffeeBeansGain || 0) * item.quantity}</li>
+                    `).join('')}
+                </ul>
+            `;
+            container.appendChild(orderCard);
+        });
+    }
   </script>
 </body>
 </html>

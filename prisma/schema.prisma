@@ -34,18 +34,6 @@ model Notification {
   user      User     @relation(fields: [userId], references: [id])
 }
 
-model MenuItem {
-  id          Int          @id @default(autoincrement())
-  name        String
-  description String?
-  category    String
-  price       Float
-  imageUrl    String?
-  // purchases   Purchase[]  // <--- REMOVIDO: Purchase agora se relaciona com PurchaseItem, não diretamente com MenuItem
-  purchaseItems PurchaseItem[] // <--- NOVO: Relação com PurchaseItem
-  cartItems   CartItem[]   // <--- NOVO: Relação com CartItem
-}
-
 model Mission {
   id                 Int           @id @default(autoincrement())
   title              String
@@ -67,27 +55,6 @@ model UserMission {
   @@id([userId, missionId])
 }
 
-model PurchaseItem {
-  id            String    @id @default(uuid())
-  purchaseId    String
-  purchase      Purchase  @relation(fields: [purchaseId], references: [id])
-  menuItemId    Int
-  menuItem      MenuItem  @relation(fields: [menuItemId], references: [id]) // <--- AQUI: AgoraMenuItem tem o purchaseItems[]
-  quantity      Int
-  priceAtPurchase Float   // O preço do item no momento da compra (para histórico)
-}
-
-model Purchase {
-  id        String       @id @default(uuid())
-  userId    String
-  user      User         @relation(fields: [userId], references: [id])
-  total     Float        @default(0)
-  status    String       @default("Completed")
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
-  items     PurchaseItem[]
-}
-
 model Cart {
   id        String    @id @default(uuid())
   userId    String    @unique
@@ -104,4 +71,42 @@ model CartItem {
   quantity    Int
   itemName    String
   itemPrice   Float
+}
+model MenuItem {
+  id              Int       @id @default(autoincrement())
+  name            String    @unique
+  description     String?
+  price           Float
+  imageUrl        String?
+  category        String?
+  xpGain          Int?      @default(0) // <--- CONFIRME ESSE CAMPO
+  coffeeBeansGain Int?      @default(0) // <--- CONFIRME ESSE CAMPO
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  cartItems       CartItem[]
+  purchaseItems   PurchaseItem[]
+}
+
+model Purchase {
+  id            String       @id @default(uuid())
+  userId        String
+  user          User         @relation(fields: [userId], references: [id])
+  total         Float        @default(0)
+  status        String       @default("Completed")
+  paymentMethod String?      // <--- CONFIRME ESSE CAMPO
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  items         PurchaseItem[]
+}
+
+model PurchaseItem {
+  id              String   @id @default(uuid())
+  purchaseId      String
+  purchase        Purchase @relation(fields: [purchaseId], references: [id])
+  menuItemId      Int      // <--- CONFIRME QUE ESTE É Int (corrigindo erro de tipo 'menuItemId')
+  menuItem        MenuItem @relation(fields: [menuItemId], references: [id])
+  quantity        Int
+  priceAtPurchase Float
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }

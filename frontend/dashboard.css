@@ -295,4 +295,11 @@
         font-weight: bold;
         text-align: left;
     }
+    .btn-disabled-red {
+        background-color: #dc3545 !important; /* Vermelho */
+        cursor: not-allowed !important;
+    }
+    .btn-disabled-red:hover {
+        background-color: #c82333 !important; /* Vermelho mais escuro no hover */
+    }
 }

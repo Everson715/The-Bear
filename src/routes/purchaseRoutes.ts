@@ -1,22 +1,26 @@
-// src/routes/purchaseRoutes.ts (Confirmado, já deve estar assim)
-
+// src/routes/purchaseRoutes.ts
 import { Router } from "express";
-import { purchaseController } from "../controllers/purchaseController";
-import { authMiddleware } from "../middlewares/authMiddleware"; // Certifique-se de que o caminho está correto
+import { purchaseController } from "../controllers/purchaseController"; // Importe o objeto controller
+import { authMiddleware } from "../middlewares/authMiddleware";
+// import { adminMiddleware } from "../middlewares/adminMiddleware"; // Se não for usado aqui, pode remover
 
 const router = Router();
 
-// Rota para compra direta (se mantida, caso contrário, remova)
-router.post("/purchase", authMiddleware, purchaseController.create);
+// Rotas de Usuário Autenticado para Carrinho e Compras
+router.get("/cart/:userId", authMiddleware, purchaseController.getCartByUserId); // GET /api/purchases/cart/:userId
+router.post("/cart/add", authMiddleware, purchaseController.addToCart); // POST /api/purchases/cart/add
+router.put("/cart/update/:cartItemId", authMiddleware, purchaseController.updateCartItemQuantity); // PUT /api/purchases/cart/update/:cartItemId
+router.delete("/cart/remove/:cartItemId", authMiddleware, purchaseController.removeFromCart); // DELETE /api/purchases/cart/remove/:cartItemId
+router.post("/cart/checkout", authMiddleware, purchaseController.checkoutCart); // POST /api/purchases/cart/checkout
 
-// Rota para obter todas as compras (finalizadas)
-router.get("/purchases", authMiddleware, purchaseController.getAll);
+router.get("/user/:userId", authMiddleware, purchaseController.getUserPurchases); // GET /api/purchases/user/:userId
 
-// Rotas do carrinho
-router.get("/cart/:userId", authMiddleware, purchaseController.getCartByUserId); // Pode ser "/cart" e usar req.user.id
-router.post("/cart/add", authMiddleware, purchaseController.addToCart);
-router.put("/cart/update", authMiddleware, purchaseController.updateCartItemQuantity);
-router.delete("/cart/remove", authMiddleware, purchaseController.removeFromCart);
-router.post("/cart/checkout", authMiddleware, purchaseController.checkoutCart);
+// Rota para compra direta de item com grãos (se você precisar disso além do carrinho)
+router.post("/buy-with-beans", authMiddleware, purchaseController.buyItemWithCoffeeBeans); // POST /api/purchases/buy-with-beans
+
+// Rotas para admins (ex: ver todas as compras)
+// router.get("/", authMiddleware, adminMiddleware, purchaseController.getAll); // GET /api/purchases (todas as compras)
+// router.post("/", authMiddleware, adminMiddleware, purchaseController.create); // POST /api/purchases (criação direta de compra, se houver)
+
 
 export default router;

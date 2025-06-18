@@ -1,8 +1,9 @@
+// src/services/UserService.ts
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { prisma } from "../utils/prisma";
 
-const jwtSecret = process.env.JWT_SECRET || "secreta-do-bear";
+const jwtSecret = process.env.JWT_SECRET || "secreta-do-bear"; // Garanta que este SECRET é o mesmo usado para assinar o JWT
 
 export class UserService {
   async register(name: string, email: string, password: string) {
@@ -25,38 +26,41 @@ export class UserService {
     });
   }
 
-async login(email: string, password: string) {
-  const user = await prisma.user.findUnique({
-    where: { email },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      password: true,
-      xp: true,
-      coffeeBeans: true,
-      level: true,
-      isAdmin: true
-    }
-  });
+  async login(email: string, password: string) {
+    const user = await prisma.user.findUnique({
+      where: { email },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        password: true,
+        xp: true,
+        coffeeBeans: true,
+        level: true,
+        isAdmin: true
+      }
+    });
 
-  if (!user) throw new Error("Email ou senha inválidos");
+    if (!user) throw new Error("Email ou senha inválidos");
 
-  const isMatch = await bcrypt.compare(password, user.password);
-  if (!isMatch) throw new Error("Email ou senha inválidos");
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) throw new Error("Email ou senha inválidos");
 
-  const token = jwt.sign({ userId: user.id }, jwtSecret, { expiresIn: "1d" });
+    const token = jwt.sign(
+      { userId: user.id, isAdmin: user.isAdmin }, // INCLUIR isAdmin no payload do token para o frontend
+      jwtSecret,
+      { expiresIn: "1d" }
+    );
 
-  const { password: _, ...userWithoutPassword } = user;
+    const { password: _, ...userWithoutPassword } = user;
 
-  return {
-    user: userWithoutPassword,
-    token
-  };
-}
+    return {
+      user: userWithoutPassword,
+      token
+    };
+  }
 
-
-  async findById(id: string) {
+  async findById(id: string) { // Mantido como está no seu código fornecido
     return await prisma.user.findUnique({
       where: { id },
       include: {
@@ -64,5 +68,26 @@ async login(email: string, password: string) {
         notifications: true
       }
     });
+  }
+
+  // NOVO MÉTODO PARA O PERFIL DO DASHBOARD (busca apenas dados essenciais)
+  async getUserProfile(userId: string) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        xp: true,
+        coffeeBeans: true,
+        level: true,
+        isAdmin: true,
+      },
+    });
+
+    if (!user) {
+      throw new Error("Usuário não encontrado.");
+    }
+    return user;
   }
 }
